@@ -4,13 +4,9 @@ from neo4j import GraphDatabase
 
 from db.transactions import TransactionType
 
-load_dotenv("./.env")
-
 
 class FamilyGraph:
-    def __init__(
-        self, uri: str, user: str, password: str
-    ) -> neo4j.Driver | neo4j.BoltDriver:
+    def __init__(self, uri: str, user: str, password: str) -> None:
 
         self.driver: neo4j.Driver = GraphDatabase.driver(
             uri, auth=(user, password)
