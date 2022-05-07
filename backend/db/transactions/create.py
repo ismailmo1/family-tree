@@ -1,7 +1,7 @@
 from uuid import uuid4
 
 from db import family_graph
-from db.transactions import TransactionType
+from db.transactions.types import TransactionType
 
 
 @family_graph.transaction(TransactionType.WRITE)

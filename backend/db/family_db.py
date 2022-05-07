@@ -2,7 +2,7 @@ import neo4j
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
-from db.transactions import TransactionType
+from db.transactions.types import TransactionType
 
 
 class FamilyGraph:
