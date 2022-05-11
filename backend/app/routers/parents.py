@@ -11,5 +11,5 @@ def get_parents(id: str):
 
 
 @router.post("/")
-def get_parents(child_id: str, parent1_id: str, parent2_id: str):
+def post_parents(child_id: str, parent1_id: str, parent2_id: str):
     return add_parent(child_id, parent1_id, parent2_id)
