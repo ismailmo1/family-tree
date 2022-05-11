@@ -3,7 +3,7 @@ from app.db.transactions.types import TransactionType
 
 
 @family_graph.transaction(TransactionType.READ)
-def find_person_by_name(person_name: str) -> list[dict[str, str]]:
+def find_person_by_name(person_name: str) -> list[str]:
     """Find person nodes that match name
 
     Args:
@@ -11,10 +11,19 @@ def find_person_by_name(person_name: str) -> list[dict[str, str]]:
         person_name (str): the name to search for
 
     Returns:
-        list[dict[str, str]]: list of people dict: [{"name":<NAME>, "id":<ID>}]
+        list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
     """
-    cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.name as name, p.id as id"
+    cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.id as id"
     query = (cypher_query, {"person_name": person_name})
+
+    return query
+
+
+@family_graph.transaction(TransactionType.READ)
+def find_person_properties(person_id: str) -> dict[str, str]:
+
+    cypher_query = "MATCH (p:Person { id:$person_id }) RETURN properties(p)"
+    query = (cypher_query, {"person_id": person_id})
 
     return query
 
@@ -32,6 +41,18 @@ def find_parents(child_id: str):
 
 
 @family_graph.transaction(TransactionType.READ)
+def find_children(parent_id: str):
+
+    cypher_query = (
+        "MATCH (:Person{id:$parent_id} )<-[:CHILD_OF]-(children:Person)"
+        "RETURN children.id as id, children.name as name"
+    )
+    query = (cypher_query, {"child_id": parent_id})
+
+    return query
+
+
+@family_graph.transaction(TransactionType.READ)
 def find_full_siblings(person_id: str):
 
     cypher_query = (
@@ -40,7 +61,7 @@ def find_full_siblings(person_id: str):
         "-[:CHILD_OF]->(parent2:Person)"
         "RETURN DISTINCT siblings.id as id, siblings.name as name"
     )
-    query = (cypher_query, {"child_id": person_id})
+    query = (cypher_query, {"person_id": person_id})
 
     return query
 
@@ -61,7 +82,7 @@ def find_all_siblings(person_id: str):
         "<-[:CHILD_OF]-(siblings:Person)"
         "RETURN DISTINCT siblings.id as id, siblings.name as name"
     )
-    query = (cypher_query, {"child_id": person_id})
+    query = (cypher_query, {"person_id": person_id})
 
     return query
 
