@@ -20,9 +20,20 @@ def find_person_by_name(person_name: str) -> list[str]:
 
 
 @family_graph.transaction(TransactionType.READ)
-def find_person_properties(person_id: str) -> dict[str, str]:
+def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
+    """return list of properties in format: [{'props':{'prop1':val1...}]
 
-    cypher_query = "MATCH (p:Person { id:$person_id }) RETURN properties(p)"
+    Usage: person_props = find_person_properties(person_id)[0]['props']
+
+    Args:
+        person_id (str): id of person
+
+    Returns:
+        list[dict[str, dict[str, str]]]: list of length one with format described above
+    """
+    cypher_query = (
+        "MATCH (p:Person { id:$person_id }) RETURN properties(p) as props"
+    )
     query = (cypher_query, {"person_id": person_id})
 
     return query
