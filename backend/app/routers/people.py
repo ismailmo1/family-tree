@@ -14,8 +14,11 @@ def get_person(id: str | None = None, name: str | None = None):
         raise HTTPException(400, "You must provide either an id or name!")
     elif name:
         id_list = find_person_by_name(name)
-        for id in id_list:
-            people_props = find_person_properties(id)
+        people_props = []
+        for person in id_list:
+            people_props.append(
+                find_person_properties(person["id"])[0]["props"]
+            )
     else:
         people_props = find_person_properties(id)
     return people_props

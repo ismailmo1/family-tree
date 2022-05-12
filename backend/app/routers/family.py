@@ -43,6 +43,6 @@ def get_nuclear_family(child_id: str):
     parents = find_parents(child_id)
     children = find_siblings(child_id)
     child_props = find_person_properties(child_id)
-    child = {"id": child_props[id], "name": child_props["name"]}
-    children.append(*child)
+    child = child_props[0]["props"]
+    children.append(child)
     return {"parents": parents, "children": children}
