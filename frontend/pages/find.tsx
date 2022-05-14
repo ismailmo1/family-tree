@@ -27,6 +27,11 @@ const Find: NextPage = () => {
     }, [])
 
     const peopleMatchCards = personMatches.map((p) => (<PersonCard key={p.id} name={p.name} id={p.id} />))
+    const skeletonCard = (
+        <Skeleton width='100%' >
+            <PersonCard key="dummy" name="dummy" id="dummy" />
+        </Skeleton>
+    )
 
     return (
         <>
@@ -45,9 +50,8 @@ const Find: NextPage = () => {
                 <VStack>
                     {isFetching ?
                         <>
-                            <Skeleton height='100px' width='100%' />
-                            <Skeleton height='100px' width='100%' />
-                            <Skeleton height='100px' width='100%' />
+                            {skeletonCard}
+                            {skeletonCard}
                         </>
                         :
                         peopleMatchCards}
