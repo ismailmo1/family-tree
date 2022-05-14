@@ -1,5 +1,4 @@
 import { Container } from '@chakra-ui/react'
-import Head from 'next/head'
 import NavBar, { NavItem } from '../navigation/navbar'
 
 interface LayoutProps {
@@ -12,12 +11,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     return (
         <>
-            <Head>
-                <title>Family Tree</title>
-                <link rel="icon" href="/tree.png"></link>
-            </Head>
             <NavBar mainLinks={mainLinks} avatarLinks={avatarLinks} />
-            <Container maxW={1000} >
+            <Container maxW={1000} centerContent >
                 {children}
             </Container>
         </>
