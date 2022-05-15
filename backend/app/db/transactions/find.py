@@ -40,6 +40,18 @@ def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
 
 
 @family_graph.transaction(TransactionType.READ)
+def find_spouse(id: str):
+
+    cypher_query = (
+        "MATCH (:Person{id:$id} )-[:SPOUSE_OF]-(spouse:Person)"
+        "RETURN spouse.id as id, spouse.name as name"
+    )
+    query = (cypher_query, {"id": id})
+
+    return query
+
+
+@family_graph.transaction(TransactionType.READ)
 def find_parents(child_id: str):
 
     cypher_query = (

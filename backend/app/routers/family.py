@@ -4,6 +4,7 @@ from app.db.transactions.find import (
     find_parents,
     find_person_properties,
     find_siblings,
+    find_spouse,
 )
 from fastapi import APIRouter
 
@@ -38,11 +39,20 @@ def get_piblings(id: str):
     }
 
 
+@router.get("/spouse")
+def get_spouse(id: str):
+    return find_spouse(id)
+
+
 @router.get("/nuclear")
-def get_nuclear_family(child_id: str):
-    parents = find_parents(child_id)
-    children = find_siblings(child_id)
-    child_props = find_person_properties(child_id)
-    child = child_props[0]["props"]
-    children.append(child)
+def get_nuclear_family(child_id: str = None, parent_id: str = None):
+    if child_id:
+        parents = find_parents(child_id)
+        children = find_siblings(child_id)
+        child_props = find_person_properties(child_id)
+        child = child_props[0]["props"]
+        children.append(child)
+    if parent_id:
+        parents = child_id
+
     return {"parents": parents, "children": children}
