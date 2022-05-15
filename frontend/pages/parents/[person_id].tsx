@@ -3,43 +3,33 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import SearchResults from "../../components/cards/SearchResults";
+import { PersonMatchResult } from "../../types/person";
 
-interface PersonDetails {
-    props: {
-        id: string,
-        name: string
+const ParentsPage: NextPage = () => {
+  const router = useRouter();
+  const { person_id: personId } = router.query;
+  const [parentDetails, setParentDetails] = useState<PersonMatchResult[]>();
+
+  useEffect(() => {
+    if (!personId) {
+      return;
     }
-}
+    const fetchParentDetails = async () => {
+      const res = await fetch(`http://localhost:8000/parents/?id=${personId}`);
+      const data: PersonMatchResult[] = await res.json();
+      setParentDetails(data);
+    };
+    fetchParentDetails();
+  }, [personId]);
 
+  return (
+    <>
+      <Heading py={5}>Parents</Heading>
+      {parentDetails ? <SearchResults personMatches={parentDetails} /> : ""}
+      <Link href={`/person/${personId}`}>Back to person details</Link>
+    </>
+  );
+};
 
-const PersonPage: NextPage = () => {
-    const router = useRouter()
-    const { person_id: personId } = router.query
-    const currPath = router.asPath;
-    const [personDetails, setPersonDetails] = useState<PersonDetails[]>();
-
-    useEffect(() => {
-        if (!personId) {
-            return;
-        }
-
-        const fetchPersonDetails = async () => {
-            const res = await fetch(`http://localhost:8000/people/?id=${personId}`)
-            const data: PersonDetails[] = await res.json()
-            setPersonDetails(data)
-        }
-        fetchPersonDetails();
-    }, [personId])
-
-    return (
-        <>
-            <Heading>
-                Family
-            </Heading>
-            {personDetails ? personDetails[0].props?.name : ""}
-            <Link href={`/person/${personId}`}>Back to person details</Link>
-        </>
-    )
-}
-
-export default PersonPage;
+export default ParentsPage;

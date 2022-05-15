@@ -1,46 +1,46 @@
-import { Heading } from "@chakra-ui/react";
+import { AddIcon } from "@chakra-ui/icons";
+import { Button, ButtonGroup, Heading } from "@chakra-ui/react";
 import { NextPage } from "next";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-
-interface PersonDetails {
-    props: {
-        id: string,
-        name: string
-    }
-}
-
+import SearchResults from "../../components/cards/SearchResults";
+import { PersonMatchResult } from "../../types/person";
 
 const PersonPage: NextPage = () => {
-    const router = useRouter()
-    const { person_id: personId } = router.query
-    const [personDetails, setPersonDetails] = useState<PersonDetails[]>();
+  const router = useRouter();
+  const { person_id: personId } = router.query;
+  const [personDetails, setPersonDetails] = useState<PersonMatchResult[]>();
 
-    useEffect(() => {
-        if (!personId) {
-            return;
-        }
+  useEffect(() => {
+    if (!personId) {
+      return;
+    }
 
-        const fetchPersonDetails = async () => {
-            const res = await fetch(`http://localhost:8000/people/?id=${personId}`)
-            const data: PersonDetails[] = await res.json()
-            setPersonDetails(data)
-        }
-        fetchPersonDetails();
-    }, [personId])
+    const fetchPersonDetails = async () => {
+      const res = await fetch(`http://localhost:8000/people/?id=${personId}`);
+      const data: PersonMatchResult[] = await res.json();
+      setPersonDetails(data);
+    };
+    fetchPersonDetails();
+  }, [personId]);
 
-    return (
-        <>
-            <Heading>
-                Details
-            </Heading>
-            {personDetails ? personDetails[0].props?.name : ""}
-            <Link href={`/siblings/${personId}`}>Find Siblings</Link>
-            <Link href={`/parents/${personId}`}>Find Parents</Link>
-            <Link href={`/family/${personId}`}>Find Family</Link>
-        </>
-    )
-}
+  return (
+    <>
+      <Heading>Details</Heading>
+      {personDetails ? <SearchResults personMatches={personDetails} /> : ""}
+      <ButtonGroup orientation="horizontal">
+        <Button>
+          <AddIcon mx={2} /> Sibling
+        </Button>
+        <Button>
+          <AddIcon mx={2} /> Spouse
+        </Button>
+        <Button>
+          <AddIcon mx={2} /> Children
+        </Button>
+      </ButtonGroup>
+    </>
+  );
+};
 
 export default PersonPage;

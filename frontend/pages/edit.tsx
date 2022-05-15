@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 
 const Edit: NextPage = () => {
-    return <></>
-}
+  return <></>;
+};
 
 export default Edit;

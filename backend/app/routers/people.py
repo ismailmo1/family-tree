@@ -30,4 +30,4 @@ def get_person(id: str | None = None, name: str | None = None):
 
 @router.post("/")
 def add_person(name: str):
-    return create_person(name)
+    return create_person(name)[0]

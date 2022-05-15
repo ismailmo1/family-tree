@@ -3,20 +3,14 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-
-interface PersonDetails {
-    props: {
-        id: string,
-        name: string
-    }
-}
+import SearchResults from "../../components/cards/SearchResults";
+import { PersonMatchResult } from "../../types/person";
 
 
-const PersonPage: NextPage = () => {
+const SiblingsPage: NextPage = () => {
     const router = useRouter()
     const { person_id: personId } = router.query
-    const currPath = router.asPath;
-    const [personDetails, setPersonDetails] = useState<PersonDetails[]>();
+    const [siblings, setSiblings] = useState<PersonMatchResult[]>();
 
     useEffect(() => {
         if (!personId) {
@@ -24,9 +18,9 @@ const PersonPage: NextPage = () => {
         }
 
         const fetchPersonDetails = async () => {
-            const res = await fetch(`http://localhost:8000/people/?id=${personId}`)
-            const data: PersonDetails[] = await res.json()
-            setPersonDetails(data)
+            const res = await fetch(`http://localhost:8000/family/siblings?id=${personId}`)
+            const data: PersonMatchResult[] = await res.json()
+            setSiblings(data)
         }
         fetchPersonDetails();
     }, [personId])
@@ -36,10 +30,11 @@ const PersonPage: NextPage = () => {
             <Heading>
                 Siblings
             </Heading>
-            {personDetails ? personDetails[0].props?.name : ""}
+            {siblings ? <SearchResults personMatches={siblings} /> : ""}
+
             <Link href={`/person/${personId}`}>Back to person details</Link>
         </>
     )
 }
 
-export default PersonPage;
+export default SiblingsPage;

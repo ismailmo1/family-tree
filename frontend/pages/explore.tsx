@@ -1,7 +1,7 @@
 import { NextPage } from "next";
 
 const Explore: NextPage = () => {
-    return <></>
-}
+  return <></>;
+};
 
 export default Explore;
