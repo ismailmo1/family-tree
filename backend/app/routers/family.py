@@ -16,18 +16,18 @@ def wed_couple(person1_id: str, person2_id: str):
 
 
 @router.get("/siblings")
-def get_siblings(person_id: str, full_only: bool = False):
-    return find_siblings(person_id, full_only)
+def get_siblings(id: str, full_only: bool = False):
+    return find_siblings(id, full_only)
 
 
 @router.get("/cousins")
-def get_cousins(person_id: str, degree: int = 1):
-    return find_cousins(person_id, degree)
+def get_cousins(id: str, degree: int = 1):
+    return find_cousins(id, degree)
 
 
 @router.get("/piblings")
-def get_piblings(person_id: str):
-    parents = find_parents(person_id)
+def get_piblings(id: str):
+    parents = find_parents(id)
 
     parent1_siblings = find_siblings(parents[0]["id"])
     parent2_siblings = find_siblings(parents[1]["id"])
