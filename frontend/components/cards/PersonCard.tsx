@@ -8,7 +8,7 @@ interface PersonCardProps {
 
 const PersonCard: React.FC<PersonCardProps> = ({ name, id }) => {
   return (
-    <Box p={10} bgColor="lightgrey" width={"100%"}>
+    <Box p={10} bgColor="#B4CFB0" width={"100%"} rounded="lg">
       <VStack>
         <Link href={`/person/${id}`}>
           <Heading mb={4} size="lg" as="button">
