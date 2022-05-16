@@ -1,4 +1,8 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
   Button,
   Center,
   Container,
@@ -9,13 +13,33 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { NextPage } from "next";
-import Link from "next/link";
+import { useRouter } from "next/router";
 import { useCallback, useRef, useState } from "react";
 import { PersonMatchResult } from "../types/person";
+
 const New: NextPage = () => {
   const personName = useRef<HTMLInputElement>(null);
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const toast = useToast();
+  const router = useRouter();
+
+  const toastContent = (id: string, name: string) => (
+    <Alert
+      status="success"
+      as="button"
+      onClick={() => router.push(`/person/${id}`)}
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      textAlign="center"
+    >
+      <AlertIcon />
+      <AlertTitle>{name} added successfully!</AlertTitle>
+      <AlertDescription>
+        Click me to go to their page to add relationships
+      </AlertDescription>
+    </Alert>
+  );
 
   const addPerson = useCallback(async () => {
     setIsAdding(true);
@@ -24,10 +48,8 @@ const New: NextPage = () => {
       { method: "POST" }
     );
     const data: PersonMatchResult = await res.json();
-    const toastContent = () => (
-      <Link href={`/person/${data.id}`}>Go to Page</Link>
-    );
-    toast({ render: toastContent, isClosable: true });
+
+    toast({ render: () => toastContent(data.id, data.name), isClosable: true });
     setIsAdding(false);
   }, []);
 
