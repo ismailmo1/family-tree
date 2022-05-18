@@ -7,11 +7,14 @@ import {
   Skeleton,
   VStack,
 } from "@chakra-ui/react";
-import { useCallback, useRef, useState } from "react";
-import PersonCard from "../../components/cards/PersonCard";
+import React, { useCallback, useRef, useState } from "react";
 import { PersonMatchResult } from "../../types/person";
 
-const FindForm: React.FC = () => {
+interface FindFormProps {
+  personCard: React.FC<PersonMatchResult>;
+}
+
+const FindForm: React.FC<FindFormProps> = ({ personCard: PersonCard }) => {
   const personName = useRef<HTMLInputElement>(null);
   const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
