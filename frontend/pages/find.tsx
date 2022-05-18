@@ -1,6 +1,6 @@
 import { Center, Container, Heading } from "@chakra-ui/react";
 import { NextPage } from "next";
-import FindForm from "../components/forms/findPerson";
+import FindForm from "../components/forms/FindPerson";
 
 const Find: NextPage = () => {
   return (

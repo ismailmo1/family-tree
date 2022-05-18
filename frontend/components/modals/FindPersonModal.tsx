@@ -7,7 +7,7 @@ import {
   ModalContent,
   ModalOverlay,
 } from "@chakra-ui/react";
-import FindForm from "../forms/findPerson";
+import FindForm from "../forms/FindPerson";
 interface ModalProps {
   onClose: () => void;
   isOpen: boolean;

@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SearchResults from "../../../components/cards/SearchResults";
-import FindPersonModal from "../../../components/modals/findPersonModal";
-import Header from "../../../components/utils/header";
+import FindPersonModal from "../../../components/modals/FindPersonModal";
+import Header from "../../../components/utils/PageHeader";
 import { PersonMatchResult } from "../../../types/person";
 
 const SiblingsPage: NextPage = () => {
