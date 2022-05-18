@@ -26,7 +26,11 @@ const ParentsPage: NextPage = () => {
   return (
     <>
       <Heading py={5}>Parents</Heading>
-      {parentDetails ? <SearchResults personMatches={parentDetails} /> : ""}
+      {parentDetails ? (
+        <SearchResults personMatches={parentDetails} />
+      ) : (
+        "searching for parents..."
+      )}
       <Link href={`/person/${personId}`}>Back to person details</Link>
     </>
   );

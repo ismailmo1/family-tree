@@ -29,7 +29,7 @@ const FamilyPage: NextPage = () => {
   return (
     <>
       <Heading>Family</Heading>
-      {family ? <FamilyTree family={family} /> : "loading family..."}
+      {family ? <FamilyTree family={family} /> : "finding family..."}
       <Link href={`/person/${personId}`}>Back to person details</Link>
     </>
   );
