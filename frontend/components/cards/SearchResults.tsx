@@ -1,4 +1,4 @@
-import { Container, VStack } from "@chakra-ui/react";
+import { Container, Text, VStack } from "@chakra-ui/react";
 import { PersonMatchResult } from "../../types/person";
 import PersonCard from "./PersonCard";
 interface SearchResultProps {
@@ -6,15 +6,25 @@ interface SearchResultProps {
 }
 
 const SearchResults: React.FC<SearchResultProps> = ({ personMatches }) => {
-  const personCards = personMatches.map((person) => (
-    <PersonCard id={person.id} name={person.name} />
-  ));
+  if (personMatches.length > 0) {
+    const personCards = personMatches.map((person) => (
+      <PersonCard id={person.id} name={person.name} />
+    ));
 
-  return (
-    <Container minWidth={"60%"} py={5}>
-      <VStack>{personCards}</VStack>
-    </Container>
-  );
+    return (
+      <Container minWidth={"60%"} py={5}>
+        <VStack>{personCards}</VStack>
+      </Container>
+    );
+  } else {
+    return (
+      <Container minWidth={"60%"} py={5}>
+        <VStack>
+          <Text>No Matches found</Text>
+        </VStack>
+      </Container>
+    );
+  }
 };
 
 export default SearchResults;
