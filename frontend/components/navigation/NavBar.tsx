@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { ReactNode } from "react";
-import NavLink from "./navlink";
+import NavLink from "./NavLink";
 
 export interface NavItem {
   text: string;

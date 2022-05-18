@@ -1,5 +1,5 @@
 import { Container } from "@chakra-ui/react";
-import NavBar, { NavItem } from "../navigation/navbar";
+import NavBar, { NavItem } from "../navigation/NavBar";
 
 interface LayoutProps {
   children?: React.ReactNode;
