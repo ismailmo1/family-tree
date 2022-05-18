@@ -1,5 +1,6 @@
 from app.db.transactions.create import create_marriage
 from app.db.transactions.find import (
+    find_children,
     find_cousins,
     find_parents,
     find_person_properties,
@@ -53,6 +54,9 @@ def get_nuclear_family(child_id: str = None, parent_id: str = None):
         child = child_props[0]["props"]
         children.append(child)
     if parent_id:
-        parents = child_id
+        parent = find_person_properties(parent_id)[0]["props"]
+        spouse = find_spouse(parent_id)
+        parents = [*spouse, parent]
+        children = find_children(parent_id)
 
     return {"parents": parents, "children": children}

@@ -70,7 +70,7 @@ def find_children(parent_id: str):
         "MATCH (:Person{id:$parent_id} )<-[:CHILD_OF]-(children:Person)"
         "RETURN children.id as id, children.name as name"
     )
-    query = (cypher_query, {"child_id": parent_id})
+    query = (cypher_query, {"parent_id": parent_id})
 
     return query
 
