@@ -1,12 +1,8 @@
 import { Box, Heading, HStack, Text, VStack } from "@chakra-ui/react";
 import Link from "next/link";
+import { PersonMatchResult } from "../../types/person";
 
-interface PersonCardProps {
-  name: string;
-  id: string;
-}
-
-const PersonCard: React.FC<PersonCardProps> = ({ name, id }) => {
+const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
   return (
     <Box p={10} bgColor="#B4CFB0" width={"100%"} rounded="lg">
       <VStack>

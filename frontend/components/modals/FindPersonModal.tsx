@@ -7,7 +7,9 @@ import {
   ModalContent,
   ModalOverlay,
 } from "@chakra-ui/react";
-import FindForm from "../forms/FindPerson";
+import PersonCard from "../cards/PersonCard";
+import FindForm from "../forms/FindPersonForm";
+
 interface ModalProps {
   onClose: () => void;
   isOpen: boolean;
@@ -29,7 +31,7 @@ const FindPersonModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <Heading>Find Siblings</Heading>
         </Center>
         <Container>
-          <FindForm />
+          <FindForm personCard={PersonCard} />
         </Container>
       </ModalContent>
     </Modal>

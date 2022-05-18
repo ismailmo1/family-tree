@@ -1,7 +1,7 @@
 import { Center, Container, Heading } from "@chakra-ui/react";
 import { NextPage } from "next";
-import FindForm from "../components/forms/FindPerson";
-
+import PersonCard from "../components/cards/PersonCard";
+import FindForm from "../components/forms/FindPersonForm";
 const Find: NextPage = () => {
   return (
     <>
@@ -9,7 +9,7 @@ const Find: NextPage = () => {
         <Heading>Find</Heading>
       </Center>
       <Container minWidth={"60%"}>
-        <FindForm />
+        <FindForm personCard={PersonCard} />
       </Container>
     </>
   );
