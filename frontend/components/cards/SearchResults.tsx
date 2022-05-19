@@ -8,7 +8,7 @@ interface SearchResultProps {
 const SearchResults: React.FC<SearchResultProps> = ({ personMatches }) => {
   if (personMatches.length > 0) {
     const personCards = personMatches.map((person) => (
-      <PersonCard id={person.id} name={person.name} />
+      <PersonCard key={person.id} id={person.id} name={person.name} />
     ));
 
     return (
