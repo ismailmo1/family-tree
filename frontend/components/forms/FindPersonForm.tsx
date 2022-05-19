@@ -5,16 +5,27 @@ import {
   FormLabel,
   Input,
   Skeleton,
+  Text,
   VStack,
 } from "@chakra-ui/react";
-import React, { useCallback, useRef, useState } from "react";
+import React, { MouseEvent, useCallback, useRef, useState } from "react";
 import { PersonMatchResult } from "../../types/person";
 
-interface FindFormProps {
-  personCard: React.FC<PersonMatchResult>;
+interface ClickableCard extends PersonMatchResult {
+  onClick: (e: MouseEvent<HTMLElement>) => void;
 }
 
-const FindForm: React.FC<FindFormProps> = ({ personCard: PersonCard }) => {
+interface FindFormProps {
+  personCard: React.FC<PersonMatchResult | ClickableCard>;
+  searchHeading?: string;
+  onClick?: (e: MouseEvent<HTMLElement>) => void;
+}
+
+const FindForm: React.FC<FindFormProps> = ({
+  personCard: PersonCard,
+  searchHeading,
+  onClick,
+}) => {
   const personName = useRef<HTMLInputElement>(null);
   const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
@@ -31,7 +42,7 @@ const FindForm: React.FC<FindFormProps> = ({ personCard: PersonCard }) => {
   }, []);
 
   const peopleMatchCards = personMatches.map((p) => (
-    <PersonCard key={p.id} name={p.name} id={p.id} />
+    <PersonCard key={p.id} name={p.name} id={p.id} onClick={onClick} />
   ));
   const skeletonCard = (
     <Skeleton width="100%" rounded="lg">
@@ -58,7 +69,12 @@ const FindForm: React.FC<FindFormProps> = ({ personCard: PersonCard }) => {
             {skeletonCard}
           </>
         ) : (
-          peopleMatchCards
+          <>
+            {peopleMatchCards.length > 0 && (
+              <Text alignSelf="flex-start">{searchHeading}</Text>
+            )}
+            {peopleMatchCards}
+          </>
         )}
       </VStack>
     </>

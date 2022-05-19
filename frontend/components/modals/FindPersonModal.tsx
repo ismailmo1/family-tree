@@ -7,15 +7,21 @@ import {
   ModalContent,
   ModalOverlay,
 } from "@chakra-ui/react";
-import PersonCard from "../cards/PersonCard";
+import { MouseEvent } from "react";
+import SelectablePersonCard from "../cards/SelectablePersonCard";
 import FindForm from "../forms/FindPersonForm";
 
 interface ModalProps {
   onClose: () => void;
   isOpen: boolean;
+  onCardClick: (e: MouseEvent<HTMLElement>) => void;
 }
 
-const FindPersonModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const FindPersonModal: React.FC<ModalProps> = ({
+  isOpen,
+  onClose,
+  onCardClick,
+}) => {
   return (
     <Modal
       scrollBehavior="inside"
@@ -31,7 +37,11 @@ const FindPersonModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <Heading>Find Siblings</Heading>
         </Center>
         <Container>
-          <FindForm personCard={PersonCard} />
+          <FindForm
+            personCard={SelectablePersonCard}
+            onClick={onCardClick}
+            searchHeading={"Select a card to add as sibling"}
+          />
         </Container>
       </ModalContent>
     </Modal>

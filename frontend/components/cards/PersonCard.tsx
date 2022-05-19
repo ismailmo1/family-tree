@@ -4,7 +4,7 @@ import { PersonMatchResult } from "../../types/person";
 
 const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
   return (
-    <Box p={10} bgColor="#B4CFB0" width={"100%"} rounded="lg">
+    <Box id={id} p={10} bgColor="#B4CFB0" width={"100%"} rounded="lg">
       <VStack>
         <Link href={`/person/${id}`}>
           <Heading mb={4} size="lg" as="button">
