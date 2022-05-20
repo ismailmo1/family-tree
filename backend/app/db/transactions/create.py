@@ -32,7 +32,7 @@ def create_child(
 
 @family_graph.transaction(TransactionType.WRITE)
 def add_child(
-    child_name: str,
+    child_id: str,
     parent1_id: str,
     parent2_id: str,
 ) -> list[dict[str, str]]:
@@ -47,8 +47,7 @@ def add_child(
     query = (
         cypher_query,
         {
-            "child_name": child_name,
-            "child_id": str(uuid4()),
+            "child_id": child_id,
             "parent1_id": parent1_id,
             "parent2_id": parent2_id,
         },

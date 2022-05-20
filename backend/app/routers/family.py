@@ -24,9 +24,8 @@ def get_siblings(id: str, full_only: bool = False):
 
 @router.post("/siblings")
 def add_siblings(id: str, sibling_id: str):
-    parents_id = [p.id for p in find_parents(id)]
-    add_child(sibling_id, parents_id[0], parents_id[1])
-    return
+    parents_id = [p["id"] for p in find_parents(id)]
+    return add_child(sibling_id, parents_id[0], parents_id[1])
 
 
 @router.get("/cousins")
