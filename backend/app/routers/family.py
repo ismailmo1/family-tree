@@ -1,4 +1,4 @@
-from app.db.transactions.create import create_marriage
+from app.db.transactions.create import add_child, create_marriage
 from app.db.transactions.find import (
     find_children,
     find_cousins,
@@ -20,6 +20,13 @@ def wed_couple(person1_id: str, person2_id: str):
 @router.get("/siblings")
 def get_siblings(id: str, full_only: bool = False):
     return find_siblings(id, full_only)
+
+
+@router.post("/siblings")
+def add_siblings(id: str, sibling_id: str):
+    parents_id = [p.id for p in find_parents(id)]
+    add_child(sibling_id, parents_id[0], parents_id[1])
+    return
 
 
 @router.get("/cousins")

@@ -31,6 +31,32 @@ def create_child(
 
 
 @family_graph.transaction(TransactionType.WRITE)
+def add_child(
+    child_name: str,
+    parent1_id: str,
+    parent2_id: str,
+) -> list[dict[str, str]]:
+    cypher_query = (
+        "MATCH (parent1:Person { id: $parent1_id})"
+        "MATCH (parent2:Person { id: $parent2_id})"
+        "MATCH (child:Person { id: $child_id}) "
+        "CREATE (child)-[:CHILD_OF]-> (parent1)"
+        "CREATE (child)-[:CHILD_OF]->(parent2)"
+        "RETURN child, parent1, parent2"
+    )
+    query = (
+        cypher_query,
+        {
+            "child_name": child_name,
+            "child_id": str(uuid4()),
+            "parent1_id": parent1_id,
+            "parent2_id": parent2_id,
+        },
+    )
+    return query
+
+
+@family_graph.transaction(TransactionType.WRITE)
 def create_person(person_name: str) -> dict[str, str]:
     cypher_query = (
         "CREATE (person:Person { name: $person_name, id: $id }) "
