@@ -1,22 +1,50 @@
 import { Box, Heading, HStack, Text, VStack } from "@chakra-ui/react";
-import Link from "next/link";
+import NextLink from "next/link";
+import { useState } from "react";
 import { PersonMatchResult } from "../../types/person";
 
 const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
+  const [showFamilyOptions, setShowFamilyOptions] = useState(false);
+  const siblingOptions = (
+    <>
+      <NextLink href={`/family/${id}?perspective=parent`}>
+        Spouse & Children
+      </NextLink>
+      <Text>|</Text>
+      <NextLink href={`/family/${id}?perspective=child`}>
+        Parents & Siblings
+      </NextLink>
+      <Text>|</Text>
+      <NextLink href="#">
+        <Text onClick={() => setShowFamilyOptions(false)}>Go back</Text>
+      </NextLink>
+    </>
+  );
+
   return (
     <Box id={id} p={10} bgColor="#B4CFB0" width={"100%"} rounded="lg">
       <VStack>
-        <Link href={`/person/${id}`}>
+        <NextLink href={`/person/${id}`}>
           <Heading mb={4} size="lg" as="button">
             {name}
           </Heading>
-        </Link>
+        </NextLink>
         <HStack>
-          <Link href={`/siblings/${id}`}>🧑‍🤝‍🧑 Siblings</Link>
-          <Text>|</Text>
-          <Link href={`/parents/${id}`}>👨‍💼🙎🏻‍♀️ Parents</Link>
-          <Text>|</Text>
-          <Link href={`/family/${id}`}>👨‍👩‍👦‍👦 Family</Link>
+          {showFamilyOptions ? (
+            siblingOptions
+          ) : (
+            <>
+              <NextLink href={`/parents/${id}`}>👨‍💼🙎🏻‍♀️ Parents</NextLink>
+              <Text>|</Text>
+              <NextLink href={`/siblings/${id}`}>🧑‍🤝‍🧑 Siblings</NextLink>
+              <Text>|</Text>
+              <NextLink href="#">
+                <Text onClick={() => setShowFamilyOptions(true)}>
+                  👨‍👩‍👦‍👦 Family
+                </Text>
+              </NextLink>
+            </>
+          )}
         </HStack>
       </VStack>
     </Box>

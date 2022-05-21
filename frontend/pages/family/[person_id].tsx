@@ -10,21 +10,22 @@ const FamilyPage: NextPage = () => {
   const router = useRouter();
   const { person_id: personId } = router.query;
   const [family, setFamily] = useState<NuclearFamily>();
+  const { perspective } = router.query;
 
   useEffect(() => {
-    if (!personId) {
+    if (!personId || !perspective) {
       return;
     }
 
     const fetchFamily = async () => {
       const res = await fetch(
-        `http://localhost:8000/family/nuclear?child_id=${personId}`
+        `http://localhost:8000/family/nuclear?${perspective}_id=${personId}`
       );
       const data: NuclearFamily = await res.json();
       setFamily(data);
     };
     fetchFamily();
-  }, [personId]);
+  }, [personId, perspective]);
 
   return (
     <>
