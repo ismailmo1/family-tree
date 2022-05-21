@@ -23,7 +23,7 @@ const New: NextPage = () => {
   const toast = useToast();
   const router = useRouter();
 
-  const toastContent = (id: string, name: string) => (
+  const renderToastContent = (id: string, name: string) => (
     <Alert
       status="success"
       as="button"
@@ -49,7 +49,10 @@ const New: NextPage = () => {
     );
     const data: PersonMatchResult = await res.json();
 
-    toast({ render: () => toastContent(data.id, data.name), isClosable: true });
+    toast({
+      render: () => renderToastContent(data.id, data.name),
+      isClosable: true,
+    });
     setIsAdding(false);
   }, []);
 
