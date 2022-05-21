@@ -13,6 +13,7 @@ import { PersonMatchResult } from "../../types/person";
 
 interface ClickableCard extends PersonMatchResult {
   onClick: (e: MouseEvent<HTMLElement>) => void;
+  isLoading: boolean;
 }
 
 interface FindFormProps {
@@ -29,6 +30,7 @@ const FindForm: React.FC<FindFormProps> = ({
   const personName = useRef<HTMLInputElement>(null);
   const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [cardLoading, setCardLoading] = useState<boolean>(false);
 
   const searchPerson = useCallback(async () => {
     setIsFetching(true);
@@ -41,8 +43,22 @@ const FindForm: React.FC<FindFormProps> = ({
     setIsFetching(false);
   }, []);
 
+  const onCardClick = useCallback(
+    (e: MouseEvent<HTMLElement>) => {
+      setCardLoading(true);
+      onClick && onClick(e);
+    },
+    [onClick]
+  );
+
   const peopleMatchCards = personMatches.map((p) => (
-    <PersonCard key={p.id} name={p.name} id={p.id} onClick={onClick} />
+    <PersonCard
+      key={p.id}
+      name={p.name}
+      id={p.id}
+      onClick={onCardClick}
+      isLoading={cardLoading}
+    />
   ));
   const skeletonCard = (
     <Skeleton width="100%" rounded="lg">
