@@ -1,4 +1,8 @@
-from app.db.transactions.create import add_child, create_marriage
+from app.db.transactions.create import (
+    add_child,
+    create_marriage,
+    create_person,
+)
 from app.db.transactions.find import (
     find_children,
     find_cousins,
@@ -23,9 +27,30 @@ def get_siblings(id: str, full_only: bool = False):
 
 
 @router.post("/siblings")
-def add_siblings(id: str, sibling_id: str):
-    parents_id = [p["id"] for p in find_parents(id)]
-    return add_child(sibling_id, parents_id[0], parents_id[1])
+def add_siblings(person_id: str, sibling_to_add_id: str):
+    # use person_id's parents as first option
+    person_parents_id = [p["id"] for p in find_parents(person_id)]
+
+    if len(person_parents_id) == 0:
+        # check if sibling_to_add has parents
+        parents_id = [p["id"] for p in find_parents(sibling_to_add_id)]
+        # person_id is now the child that needs to be added to parents
+        child_id = person_id
+    else:
+        parents_id = person_parents_id
+        child_id = sibling_to_add_id
+
+    # if neither have parents create dummy/placeholder parents and add both as children
+    if len(parents_id) == 0:
+        dummy_parents = [
+            create_person("dummy_parent")[0],
+            create_person("dummy_parent")[0],
+        ]
+        parents_id = [p["id"] for p in dummy_parents]
+        add_child(person_id, parents_id[0], parents_id[1])
+        return add_child(sibling_to_add_id, parents_id[0], parents_id[1])[0]
+
+    return add_child(child_id, parents_id[0], parents_id[1])[0]
 
 
 @router.get("/cousins")
