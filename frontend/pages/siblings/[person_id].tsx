@@ -1,4 +1,4 @@
-import { useDisclosure } from "@chakra-ui/react";
+import { useDisclosure, useToast } from "@chakra-ui/react";
 import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -7,13 +7,14 @@ import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
 import Header from "../../components/utils/PageHeader";
 import { PersonMatchResult } from "../../types/person";
+import { addSiblingSuccessResponse } from "../../types/relationships";
 
 const SiblingsPage: NextPage = () => {
   const router = useRouter();
   const { person_id: personId } = router.query;
   const [siblings, setSiblings] = useState<PersonMatchResult[]>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const toast = useToast();
   useEffect(() => {
     if (!personId) {
       return;
@@ -27,10 +28,23 @@ const SiblingsPage: NextPage = () => {
       setSiblings(data);
     };
     fetchPersonDetails();
-  }, [personId]);
+  }, [personId, isOpen]);
 
-  const onCardClick = (e: MouseEvent<HTMLElement>) => {
-    console.log(e.currentTarget.id);
+  const onCardClick = async (e: MouseEvent<HTMLElement>) => {
+    const siblingToAdd = e.currentTarget.id;
+    const res = await fetch(
+      `http://localhost:8000/family/siblings?person_id=${personId}&sibling_to_add_id=${siblingToAdd}`,
+      { method: "POST" }
+    );
+    const addSiblingData: addSiblingSuccessResponse = await res.json();
+
+    toast({
+      title: "Sibling Added",
+      description: `${addSiblingData.child.name} added to the family!`,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
     onClose();
   };
 
