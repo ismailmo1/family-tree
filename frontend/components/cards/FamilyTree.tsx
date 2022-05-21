@@ -1,16 +1,29 @@
-import { Container, Heading, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Center,
+  Container,
+  Heading,
+  HStack,
+  Text,
+  VStack,
+  Wrap,
+  WrapItem,
+} from "@chakra-ui/react";
 import { NuclearFamily } from "../../types/family";
-import PersonCard from "./PersonCard";
+import SimplePersonCard from "./SimplePersonCard";
 const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
-  console.log(family.parents);
-
   const parentCards = (
     <>
       <Heading>Parents</Heading>
       <HStack>
         {family.parents.length > 0 ? (
           family.parents.map((parent) => {
-            return <PersonCard name={parent.name} id={parent.id} />;
+            return (
+              <SimplePersonCard
+                key={parent.id}
+                name={parent.name}
+                id={parent.id}
+              />
+            );
           })
         ) : (
           <Text>No Parents Found :(</Text>
@@ -22,11 +35,21 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
   const siblingCards = (
     <>
       <Heading>Children</Heading>
-      <HStack>
+      <Wrap spacing="10px" align="center" justify="center">
         {family.children.map((children) => {
-          return <PersonCard name={children.name} id={children.id} />;
+          return (
+            <WrapItem>
+              <Center>
+                <SimplePersonCard
+                  key={children.id}
+                  name={children.name}
+                  id={children.id}
+                />
+              </Center>
+            </WrapItem>
+          );
         })}
-      </HStack>
+      </Wrap>
     </>
   );
 
