@@ -16,7 +16,7 @@ const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
       </NextLink>
       <Text>|</Text>
       <NextLink href="#">
-        <Text onClick={() => setShowFamilyOptions(false)}>Go back</Text>
+        <Text onClick={() => setShowFamilyOptions(false)}>↩️</Text>
       </NextLink>
     </>
   );
@@ -37,6 +37,8 @@ const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
               <NextLink href={`/parents/${id}`}>👨‍💼🙎🏻‍♀️ Parents</NextLink>
               <Text>|</Text>
               <NextLink href={`/siblings/${id}`}>🧑‍🤝‍🧑 Siblings</NextLink>
+              <Text>|</Text>
+              <NextLink href={`/spouse/${id}`}>❤️ Spouse</NextLink>
               <Text>|</Text>
               <NextLink href="#">
                 <Text onClick={() => setShowFamilyOptions(true)}>

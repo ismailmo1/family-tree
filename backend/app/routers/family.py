@@ -16,9 +16,14 @@ from fastapi import APIRouter
 router = APIRouter(prefix="/family")
 
 
-@router.post("/wedding")
+@router.post("/spouse")
 def wed_couple(person1_id: str, person2_id: str):
-    return create_marriage(person1_id, person2_id)
+    return create_marriage(person1_id, person2_id)[0]
+
+
+@router.get("/spouse")
+def get_spouse(id: str):
+    return find_spouse(id)
 
 
 @router.get("/siblings")
@@ -69,11 +74,6 @@ def get_piblings(id: str):
         parents[0]["name"]: parent1_siblings,
         parents[1]["name"]: parent2_siblings,
     }
-
-
-@router.get("/spouse")
-def get_spouse(id: str):
-    return find_spouse(id)
 
 
 @router.get("/nuclear")
