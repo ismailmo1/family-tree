@@ -29,7 +29,7 @@ def add_parent(child_id: str, parent_id: str):
         "MATCH (child:Person { id: $child_id})"
         "MATCH (parent:Person { id: $parent_id})"
         "CREATE (child)-[:CHILD_OF]->(parent)"
-        "RETURN child.name, child.id, parent.name, parent.id"
+        "RETURN child, parent"
     )
     query = (
         cypher_query,
