@@ -24,21 +24,18 @@ def add_sibling(sibling_with_parent_id: str, new_sibling_id: str):
 
 
 @family_graph.transaction(TransactionType.WRITE)
-def add_parent(child_id: str, parent1_id: str, parent2_id: str):
+def add_parent(child_id: str, parent_id: str):
     cypher_query = (
         "MATCH (child:Person { id: $child_id})"
-        "MATCH (parent1:Person { id: $parent1_id})"
-        "MATCH (parent2:Person { id: $parent2_id})"
-        "CREATE (child)-[:CHILD_OF]->(parent1)"
-        "CREATE (child)-[:CHILD_OF]->(parent2)"
-        "RETURN child.name, child.id, parent1.name, parent1.id, parent2.name, parent2.id"
+        "MATCH (parent:Person { id: $parent_id})"
+        "CREATE (child)-[:CHILD_OF]->(parent)"
+        "RETURN child.name, child.id, parent.name, parent.id"
     )
     query = (
         cypher_query,
         {
             "child_id": child_id,
-            "parent1_id": parent1_id,
-            "parent2_id": parent2_id,
+            "parent_id": parent_id,
         },
     )
     return query
