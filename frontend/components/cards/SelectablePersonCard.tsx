@@ -4,7 +4,7 @@ import { MouseEvent } from "react";
 import { PersonMatchResult } from "../../types/person";
 interface SelectablePersonCardProps extends PersonMatchResult {
   onClick?: (e: MouseEvent<HTMLElement>) => void;
-  isLoading: boolean;
+  isLoading?: boolean;
 }
 
 const SelectablePersonCard: React.FC<SelectablePersonCardProps> = ({
