@@ -51,8 +51,13 @@ const SiblingsPage: NextPage = () => {
   return (
     <>
       <Header title="Siblings" clickHandler={onOpen} />
-      {siblings ? <SearchResults personMatches={siblings} /> : ""}
+      {siblings ? (
+        <SearchResults personMatches={siblings} />
+      ) : (
+        "searching for siblings"
+      )}
       <FindPersonModal
+        relation="sibling"
         onClose={onClose}
         isOpen={isOpen}
         onCardClick={onCardClick}

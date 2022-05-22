@@ -12,7 +12,8 @@ import SelectablePersonCard from "../cards/SelectablePersonCard";
 import FindForm from "../forms/FindPersonForm";
 
 interface ModalProps {
-  onClose: () => void;
+  relation: string;
+  onClose(): void;
   isOpen: boolean;
   onCardClick: (e: MouseEvent<HTMLElement>) => void;
 }
@@ -21,7 +22,9 @@ const FindPersonModal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   onCardClick,
+  relation,
 }) => {
+  const title = relation.charAt(0).toUpperCase() + relation.slice(1);
   return (
     <Modal
       scrollBehavior="inside"
@@ -34,13 +37,13 @@ const FindPersonModal: React.FC<ModalProps> = ({
       <ModalContent>
         <ModalCloseButton />
         <Center py="10">
-          <Heading>Find Siblings</Heading>
+          <Heading>Find {title}</Heading>
         </Center>
         <Container>
           <FindForm
             personCard={SelectablePersonCard}
             onClick={onCardClick}
-            searchHeading={"Select a card to add as sibling"}
+            searchHeading={`Select a card to add as ${relation}`}
           />
         </Container>
       </ModalContent>
