@@ -7,7 +7,6 @@ import {
   ModalContent,
   ModalOverlay,
 } from "@chakra-ui/react";
-import { MouseEvent } from "react";
 import SelectablePersonCard from "../cards/SelectablePersonCard";
 import FindForm from "../forms/FindPersonForm";
 
@@ -15,7 +14,7 @@ interface ModalProps {
   relation: string;
   onClose(): void;
   isOpen: boolean;
-  onCardClick: (e: MouseEvent<HTMLElement>) => void;
+  onCardClick: (id: string) => void;
 }
 
 const FindPersonModal: React.FC<ModalProps> = ({

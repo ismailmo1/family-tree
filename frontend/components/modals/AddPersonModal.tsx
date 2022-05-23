@@ -13,7 +13,7 @@ interface addModalProps {
   relation: string;
   onClose(): void;
   isOpen: boolean;
-  onAddPerson: () => void;
+  onAddPerson: (personId: string) => void;
 }
 
 const AddPersonModal: React.FC<addModalProps> = ({

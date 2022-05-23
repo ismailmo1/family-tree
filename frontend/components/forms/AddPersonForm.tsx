@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 import { useCallback, useRef, useState } from "react";
 import { PersonMatchResult } from "../../types/person";
 
-const CreatePersonForm: React.FC<{ onAddPerson?: () => void }> = ({
+const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
   onAddPerson,
 }) => {
   const personName = useRef<HTMLInputElement>(null);
@@ -41,9 +41,12 @@ const CreatePersonForm: React.FC<{ onAddPerson?: () => void }> = ({
   );
 
   const addPerson = useCallback(async () => {
+    if (!personName.current) {
+      return;
+    }
     setIsAdding(true);
     const res = await fetch(
-      `http://localhost:8000/people/?name=${personName.current?.value}`,
+      `http://localhost:8000/people/?name=${personName.current.value}`,
       { method: "POST" }
     );
     const data: PersonMatchResult = await res.json();
@@ -53,7 +56,7 @@ const CreatePersonForm: React.FC<{ onAddPerson?: () => void }> = ({
       isClosable: true,
     });
     setIsAdding(false);
-    onAddPerson && onAddPerson();
+    onAddPerson && onAddPerson(data.id);
   }, []);
 
   return (

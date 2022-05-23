@@ -19,7 +19,7 @@ interface ClickableCard extends PersonMatchResult {
 interface FindFormProps {
   personCard: React.FC<PersonMatchResult | ClickableCard>;
   searchHeading?: string;
-  onClick?: (e: MouseEvent<HTMLElement>) => void;
+  onClick?: (id: string) => void;
 }
 
 const FindForm: React.FC<FindFormProps> = ({
@@ -46,7 +46,8 @@ const FindForm: React.FC<FindFormProps> = ({
   const onCardClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {
       setCardLoading(true);
-      onClick && onClick(e);
+      const personId = e.currentTarget.id;
+      onClick && onClick(personId);
     },
     [onClick]
   );
