@@ -38,13 +38,9 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
       <Wrap spacing="10px" align="center" justify="center">
         {family.children.map((children) => {
           return (
-            <WrapItem>
+            <WrapItem key={children.id}>
               <Center>
-                <SimplePersonCard
-                  key={children.id}
-                  name={children.name}
-                  id={children.id}
-                />
+                <SimplePersonCard name={children.name} id={children.id} />
               </Center>
             </WrapItem>
           );
