@@ -6,7 +6,7 @@ const Find: NextPage = () => {
   return (
     <>
       <Center py="10">
-        <Heading>Find</Heading>
+        <Heading>Find Person</Heading>
       </Center>
       <Container minWidth={"60%"}>
         <FindForm personCard={PersonCard} />

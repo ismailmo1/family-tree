@@ -1,11 +1,33 @@
 import { AddIcon } from "@chakra-ui/icons";
-import { Box, Button, Heading, SimpleGrid } from "@chakra-ui/react";
-
+import {
+  Box,
+  Button,
+  ButtonGroup,
+  Center,
+  Heading,
+  Popover,
+  PopoverCloseButton,
+  PopoverContent,
+  PopoverTrigger as OrigPopoverTrigger,
+  SimpleGrid,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { ReactNode } from "react";
 interface HeaderProps {
   title: string;
-  clickHandler: () => void | null;
+  openFindModal: () => void | null;
+  openAddModal: () => void | null;
 }
-const Header: React.FC<HeaderProps> = ({ title, clickHandler }) => {
+
+// get around react 18 types
+const PopoverTrigger: React.FC<{ children: ReactNode }> = OrigPopoverTrigger;
+
+const RelationHeader: React.FC<HeaderProps> = ({
+  title,
+  openFindModal,
+  openAddModal,
+}) => {
+  const { isOpen, onToggle, onClose } = useDisclosure();
   return (
     <SimpleGrid
       columns={3}
@@ -17,13 +39,33 @@ const Header: React.FC<HeaderProps> = ({ title, clickHandler }) => {
       <Heading my={2} textAlign="center">
         {title}
       </Heading>
-      {clickHandler && (
-        <Button justifySelf="end" onClick={clickHandler}>
-          <AddIcon mx={2} />
-        </Button>
-      )}
+
+      <>
+        <Popover
+          returnFocusOnClose={false}
+          isOpen={isOpen}
+          onClose={onClose}
+          placement="auto"
+          closeOnBlur={true}
+        >
+          <PopoverTrigger>
+            <Button justifySelf="end" onClick={onToggle}>
+              <AddIcon mx={2} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent width="inherit">
+            <PopoverCloseButton />
+            <Center>
+              <ButtonGroup>
+                <Button onClick={openAddModal}>Add Person</Button>
+                <Button onClick={openFindModal}>Find Person</Button>
+              </ButtonGroup>
+            </Center>
+          </PopoverContent>
+        </Popover>
+      </>
     </SimpleGrid>
   );
 };
 
-export default Header;
+export default RelationHeader;

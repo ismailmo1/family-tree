@@ -1,13 +1,13 @@
 import { useDisclosure, useToast } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { MouseEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
-import Header from "../../components/utils/PageHeader";
+import RelationHeader from "../../components/utils/PageHeader";
 import { PersonMatchResult } from "../../types/person";
 import { addRelationSuccessResponse } from "../../types/relationships";
-
+import AddPersonModal from "../modals/AddPersonModal";
 interface GenericRelationPageProps {
   genGetPeopleUrl(id: string): string;
   genAddPeopleUrl(id: string, id_to_add: string): string;
@@ -22,7 +22,20 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const router = useRouter();
   const { person_id: personId } = router.query;
   const [peopleDetails, setPeopleDetails] = useState<PersonMatchResult[]>();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  // find person modal
+  const {
+    isOpen: isFindOpen,
+    onOpen: onFindOpen,
+    onClose: onFindClose,
+  } = useDisclosure();
+
+  // new person modal
+  const {
+    isOpen: isNewOpen,
+    onOpen: onNewOpen,
+    onClose: onNewClose,
+  } = useDisclosure();
+
   const toast = useToast();
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
 
@@ -37,14 +50,13 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
       setPeopleDetails(data);
     };
     fetchParentDetails();
-  }, [personId, isOpen]);
+  }, [personId, isFindOpen, isNewOpen]);
 
-  const onCardClick = async (e: MouseEvent<HTMLElement>) => {
+  const addRelation = async (newPersonId: string) => {
     if (!personId) {
       return;
     }
-    const newPerson = e.currentTarget.id;
-    const addPeopleUrl = genAddPeopleUrl(personId.toString(), newPerson);
+    const addPeopleUrl = genAddPeopleUrl(personId.toString(), newPersonId);
     const res = await fetch(addPeopleUrl, { method: "POST" });
     const addPersonData: addRelationSuccessResponse = await res.json();
 
@@ -55,12 +67,17 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
       duration: 5000,
       isClosable: true,
     });
-    onClose();
+    onFindClose();
   };
 
   return (
     <>
-      <Header title={`${title}s`} clickHandler={onOpen} />
+      <RelationHeader
+        title={`${title}s`}
+        openFindModal={onFindOpen}
+        openAddModal={onNewOpen}
+      />
+
       {peopleDetails ? (
         <SearchResults personMatches={peopleDetails} />
       ) : (
@@ -68,9 +85,15 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
       )}
       <FindPersonModal
         relation={relation}
-        onClose={onClose}
-        isOpen={isOpen}
-        onCardClick={onCardClick}
+        onClose={onFindClose}
+        isOpen={isFindOpen}
+        onCardClick={addRelation}
+      />
+      <AddPersonModal
+        isOpen={isNewOpen}
+        onClose={onNewClose}
+        relation={relation}
+        onAddPerson={addRelation}
       />
       <Link href={`/person/${personId}`}>Back to person details</Link>
     </>
