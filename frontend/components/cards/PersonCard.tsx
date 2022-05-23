@@ -15,9 +15,9 @@ const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
         Parents & Siblings
       </NextLink>
       <Text>|</Text>
-      <NextLink href="#">
-        <Text onClick={() => setShowFamilyOptions(false)}>↩️</Text>
-      </NextLink>
+      <Text cursor="pointer" onClick={() => setShowFamilyOptions(false)}>
+        ↩️
+      </Text>
     </>
   );
 
@@ -40,11 +40,9 @@ const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
               <Text>|</Text>
               <NextLink href={`/spouse/${id}`}>❤️ Spouse</NextLink>
               <Text>|</Text>
-              <NextLink href="#">
-                <Text onClick={() => setShowFamilyOptions(true)}>
-                  👨‍👩‍👦‍👦 Family
-                </Text>
-              </NextLink>
+              <Text cursor="pointer" onClick={() => setShowFamilyOptions(true)}>
+                👨‍👩‍👦‍👦 Family
+              </Text>
             </>
           )}
         </HStack>
