@@ -53,9 +53,10 @@ def add_siblings(person_id: str, sibling_to_add_id: str):
         ]
         parents_id = [p["id"] for p in dummy_parents]
         add_child(person_id, parents_id[0], parents_id[1])
-        return add_child(sibling_to_add_id, parents_id[0], parents_id[1])[0]
+        child = add_child(sibling_to_add_id, parents_id[0], parents_id[1])[0]
 
-    return add_child(child_id, parents_id[0], parents_id[1])[0]
+    child = add_child(child_id, parents_id[0], parents_id[1])[0]
+    return {"person": child["child"]}
 
 
 @router.get("/cousins")
