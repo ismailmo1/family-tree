@@ -4,9 +4,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
-import RelationHeader from "../../components/utils/PageHeader";
 import { PersonMatchResult } from "../../types/person";
 import { addRelationSuccessResponse } from "../../types/relationships";
+import RelationHeader from "../headers/RelationHeader";
 import AddPersonModal from "../modals/AddPersonModal";
 interface GenericRelationPageProps {
   genGetPeopleUrl(id: string): string;
@@ -21,6 +21,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
 }) => {
   const router = useRouter();
   const { person_id: personId } = router.query;
+
   const [peopleDetails, setPeopleDetails] = useState<PersonMatchResult[]>();
   // find person modal
   const {
