@@ -3,10 +3,10 @@ import RelatedPeoplePage from "../../components/genericPages/relatedPeople";
 
 const SpousePage: NextPage = () => {
   const addSpouseUrl = (id: string, spouseId: string) => {
-    return `http://localhost:8000/family/spouse?person1_id=${id}&person2_id=${spouseId}`;
+    return `/family/spouse?person1_id=${id}&person2_id=${spouseId}`;
   };
   const getSpouseUrl = (id: string) => {
-    return `http://localhost:8000/family/spouse?id=${id}`;
+    return `/family/spouse?id=${id}`;
   };
 
   return (

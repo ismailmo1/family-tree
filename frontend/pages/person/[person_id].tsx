@@ -1,5 +1,4 @@
-import { AddIcon } from "@chakra-ui/icons";
-import { Button, ButtonGroup, Heading } from "@chakra-ui/react";
+import { Heading } from "@chakra-ui/react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -28,17 +27,6 @@ const PersonPage: NextPage = () => {
     <>
       <Heading>Details</Heading>
       {personDetails ? <SearchResults personMatches={personDetails} /> : ""}
-      <ButtonGroup orientation="horizontal">
-        <Button>
-          <AddIcon mx={2} /> Sibling
-        </Button>
-        <Button>
-          <AddIcon mx={2} /> Spouse
-        </Button>
-        <Button>
-          <AddIcon mx={2} /> Children
-        </Button>
-      </ButtonGroup>
     </>
   );
 };

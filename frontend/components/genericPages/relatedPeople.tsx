@@ -1,7 +1,8 @@
-import { useDisclosure, useToast } from "@chakra-ui/react";
+import { ToastId, useDisclosure, useToast } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useFetch } from "use-http";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
 import { PersonMatchResult } from "../../types/person";
@@ -13,7 +14,6 @@ interface GenericRelationPageProps {
   genAddPeopleUrl(id: string, id_to_add: string): string;
   relation: "sibling" | "parent" | "spouse";
 }
-
 const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   relation,
   genGetPeopleUrl,
@@ -21,6 +21,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
 }) => {
   const router = useRouter();
   const { person_id: personId } = router.query;
+  const errorToastIdRef = useRef<ToastId>();
 
   const [peopleDetails, setPeopleDetails] = useState<PersonMatchResult[]>();
   // find person modal
@@ -40,18 +41,25 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const toast = useToast();
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
 
+  const { loading, error, response, request } = useFetch<PersonMatchResult[]>(
+    "http://localhost:8000"
+  );
+
+  const fetchPeople = useCallback(
+    async (url: string) => {
+      const peopleData = await request.get(url);
+      if (response.ok) setPeopleDetails(peopleData);
+    },
+    [request, response]
+  );
+
   useEffect(() => {
     if (!personId) {
       return;
     }
     const getPeopleUrl = genGetPeopleUrl(personId.toString());
-    const fetchParentDetails = async () => {
-      const res = await fetch(getPeopleUrl);
-      const data: PersonMatchResult[] = await res.json();
-      setPeopleDetails(data);
-    };
-    fetchParentDetails();
-  }, [personId, isFindOpen, isNewOpen]);
+    fetchPeople(getPeopleUrl);
+  }, [personId, isFindOpen, isNewOpen, fetchPeople, genGetPeopleUrl]);
 
   const addRelation = async (newPersonId: string) => {
     if (!personId) {
@@ -61,7 +69,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     const res = await fetch(addPeopleUrl, { method: "POST" });
     const addPersonData: addRelationSuccessResponse = await res.json();
 
-    toast({
+    errorToastIdRef.current = toast({
       title: `${title} added!`,
       description: `${addPersonData.person.name} added as ${relation}!`,
       status: "success",
@@ -71,6 +79,18 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     onFindClose();
   };
 
+  if (response.ok === false) {
+    console.log(loading, response.ok);
+
+    toast({
+      title: "something went wrong!",
+      description: `${response.status} ${response.statusText}`,
+      status: "error",
+      duration: 5000,
+      isClosable: true,
+    });
+  }
+
   return (
     <>
       <RelationHeader
@@ -79,11 +99,10 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
         openAddModal={onNewOpen}
       />
 
-      {peopleDetails ? (
-        <SearchResults personMatches={peopleDetails} />
-      ) : (
-        `searching for ${relation}s...`
-      )}
+      {loading
+        ? `searching for ${relation}s...`
+        : peopleDetails && <SearchResults personMatches={peopleDetails} />}
+
       <FindPersonModal
         relation={relation}
         onClose={onFindClose}

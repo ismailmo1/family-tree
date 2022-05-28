@@ -3,10 +3,10 @@ import RelatedPeoplePage from "../../components/genericPages/relatedPeople";
 
 const ParentsPage: NextPage = () => {
   const addParentUrl = (id: string, parentId: string) => {
-    return `http://localhost:8000/parents/?child_id=${id}&parent_id=${parentId}`;
+    return `/parents/?child_id=${id}&parent_id=${parentId}`;
   };
   const getParentUrl = (id: string) => {
-    return `http://localhost:8000/parents/?id=${id}`;
+    return `/parents/?id=${id}`;
   };
 
   return (
