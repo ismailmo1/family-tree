@@ -19,6 +19,20 @@ def find_person_by_name(person_name: str) -> list[str]:
     return query
 
 
+def find_person_by_name_no_decorator(person_name: str) -> list[str]:
+    """Find person nodes that match name
+
+    Args:
+        tx (neo4j.Transaction): OMIT this argument - it is automatically passed in by neo4j
+        person_name (str): the name to search for
+
+    Returns:
+        list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
+    """
+    cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.id as id"
+    return family_graph.read_query(cypher_query, {"person_name": person_name})
+
+
 @family_graph.transaction(TransactionType.READ)
 def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
     """return list of properties in format: [{'props':{'prop1':val1...}]
