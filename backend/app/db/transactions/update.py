@@ -1,9 +1,7 @@
 from app.db import family_graph
 from app.db.transactions.find import find_person_properties
-from app.db.transactions.types import TransactionType
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def add_sibling(sibling_with_parent_id: str, new_sibling_id: str):
     cypher_query = (
         "MATCH (:Person {id:$sibling_with_parent_id} )-[:CHILD_OF]->(parents:Person)"
@@ -12,7 +10,7 @@ def add_sibling(sibling_with_parent_id: str, new_sibling_id: str):
         "RETURN parents.name, parents.id, orphan.name, orphan.id"
     )
 
-    query = (
+    result = family_graph.write_query(
         cypher_query,
         {
             "sibling_with_parent_id": sibling_with_parent_id,
@@ -20,10 +18,9 @@ def add_sibling(sibling_with_parent_id: str, new_sibling_id: str):
         },
     )
 
-    return query
+    return result
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def add_parent(child_id: str, parent_id: str):
     cypher_query = (
         "MATCH (child:Person { id: $child_id})"
@@ -31,19 +28,21 @@ def add_parent(child_id: str, parent_id: str):
         "CREATE (child)-[:CHILD_OF]->(parent)"
         "RETURN child, parent"
     )
-    query = (
+    result = family_graph.write_query(
         cypher_query,
         {
             "child_id": child_id,
             "parent_id": parent_id,
         },
     )
-    return query
+    return result
 
 
 def add_person_prop(person_id: str, property_map: dict):
     cypher_query = "MATCH (p:Person{ id:$person_id} ) SET p = $props RETURN p"
     current_props = find_person_properties(person_id)
     props = {**current_props, **property_map}
-    query = (cypher_query, {"person_id": person_id, "props": props})
-    return query
+    result = family_graph.write_query(
+        cypher_query, {"person_id": person_id, "props": props}
+    )
+    return result

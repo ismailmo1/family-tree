@@ -1,6 +1,6 @@
 from app.db.transactions.create import create_person
 from app.db.transactions.find import (
-    find_person_by_name_no_decorator,
+    find_person_by_name,
     find_person_properties,
 )
 from fastapi import APIRouter, HTTPException
@@ -13,7 +13,7 @@ def get_person(id: str | None = None, name: str | None = None):
     if id == None and name == None:
         raise HTTPException(400, "You must provide either an id or name!")
     elif name:
-        id_list = find_person_by_name_no_decorator(name)
+        id_list = find_person_by_name(name)
         if len(id_list) == 1:
             id = id_list[0]["id"]
             return [find_person_properties(id)[0]["props"]]

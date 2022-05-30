@@ -1,8 +1,6 @@
 from app.db import family_graph
-from app.db.transactions.types import TransactionType
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_person_by_name(person_name: str) -> list[str]:
     """Find person nodes that match name
 
@@ -14,26 +12,12 @@ def find_person_by_name(person_name: str) -> list[str]:
         list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
     """
     cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.id as id"
-    query = (cypher_query, {"person_name": person_name})
-
-    return query
-
-
-def find_person_by_name_no_decorator(person_name: str) -> list[str]:
-    """Find person nodes that match name
-
-    Args:
-        tx (neo4j.Transaction): OMIT this argument - it is automatically passed in by neo4j
-        person_name (str): the name to search for
-
-    Returns:
-        list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
-    """
-    cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.id as id"
-    return family_graph.read_query(cypher_query, {"person_name": person_name})
+    results = family_graph.read_query(
+        cypher_query, {"person_name": person_name}
+    )
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
     """return list of properties in format: [{'props':{'prop1':val1...}]
 
@@ -48,48 +32,44 @@ def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
     cypher_query = (
         "MATCH (p:Person { id:$person_id }) RETURN properties(p) as props"
     )
-    query = (cypher_query, {"person_id": person_id})
+    results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
-    return query
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_spouse(id: str):
 
     cypher_query = (
         "MATCH (:Person{id:$id} )-[:SPOUSE_OF]-(spouse:Person)"
         "RETURN spouse.id as id, spouse.name as name"
     )
-    query = (cypher_query, {"id": id})
+    results = family_graph.read_query(cypher_query, {"id": id})
 
-    return query
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_parents(child_id: str):
 
     cypher_query = (
         "MATCH (:Person{id:$child_id} )-[:CHILD_OF]->(parents:Person)"
         "RETURN parents.id as id, parents.name as name"
     )
-    query = (cypher_query, {"child_id": child_id})
+    results = family_graph.read_query(cypher_query, {"child_id": child_id})
 
-    return query
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_children(parent_id: str):
 
     cypher_query = (
         "MATCH (:Person{id:$parent_id} )<-[:CHILD_OF]-(children:Person)"
         "RETURN children.id as id, children.name as name"
     )
-    query = (cypher_query, {"parent_id": parent_id})
+    results = family_graph.read_query(cypher_query, {"parent_id": parent_id})
 
-    return query
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_full_siblings(person_id: str):
 
     cypher_query = (
@@ -98,12 +78,11 @@ def find_full_siblings(person_id: str):
         "-[:CHILD_OF]->(parent2:Person)"
         "RETURN DISTINCT siblings.id as id, siblings.name as name"
     )
-    query = (cypher_query, {"person_id": person_id})
+    results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
-    return query
+    return results
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_all_siblings(person_id: str):
     """find all siblings that share atleast one parent
 
@@ -119,9 +98,9 @@ def find_all_siblings(person_id: str):
         "<-[:CHILD_OF]-(siblings:Person)"
         "RETURN DISTINCT siblings.id as id, siblings.name as name"
     )
-    query = (cypher_query, {"person_id": person_id})
+    results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
-    return query
+    return results
 
 
 def find_siblings(person_id: str, full_only=False):
@@ -131,7 +110,6 @@ def find_siblings(person_id: str, full_only=False):
         return find_all_siblings(person_id)
 
 
-@family_graph.transaction(TransactionType.READ)
 def find_cousins(person_id: str, degree: int = 1):
     """find people related to you via n_degrees of separation
 
@@ -148,6 +126,6 @@ def find_cousins(person_id: str, degree: int = 1):
         "RETURN cousins.name, cousins.id, unc_aunt.name, unc_aunt.id,"
         "parent.id,parent.name"
     )
-    query = (cypher_query, {"person_id": person_id})
+    results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
-    return query
+    return results

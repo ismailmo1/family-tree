@@ -1,10 +1,8 @@
 from uuid import uuid4
 
 from app.db import family_graph
-from app.db.transactions.types import TransactionType
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def create_child(
     child_name: str,
     parent1_id: str,
@@ -18,7 +16,7 @@ def create_child(
         "CREATE (child)-[:CHILD_OF]->(parent2)"
         "RETURN child, parent1, parent2"
     )
-    query = (
+    result = family_graph.write_query(
         cypher_query,
         {
             "child_name": child_name,
@@ -27,10 +25,9 @@ def create_child(
             "parent2_id": parent2_id,
         },
     )
-    return query
+    return result
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def add_child(
     child_id: str,
     parent1_id: str,
@@ -44,7 +41,7 @@ def add_child(
         "CREATE (child)-[:CHILD_OF]->(parent2)"
         "RETURN child"
     )
-    query = (
+    result = family_graph.write_query(
         cypher_query,
         {
             "child_id": child_id,
@@ -52,21 +49,21 @@ def add_child(
             "parent2_id": parent2_id,
         },
     )
-    return query
+    return result
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def create_person(person_name: str) -> dict[str, str]:
     cypher_query = (
         "CREATE (person:Person { name: $person_name, id: $id }) "
         "RETURN person.name as name, person.id as id"
     )
-    query = (cypher_query, {"person_name": person_name, "id": str(uuid4())})
+    result = family_graph.write_query(
+        cypher_query, {"person_name": person_name, "id": str(uuid4())}
+    )
 
-    return query
+    return result
 
 
-@family_graph.transaction(TransactionType.WRITE)
 def create_marriage(person1_id: str, person2_id: str) -> list[dict[str, str]]:
     cypher_query = (
         "MATCH (person1:Person { id: $person1_id }) "
@@ -75,9 +72,9 @@ def create_marriage(person1_id: str, person2_id: str) -> list[dict[str, str]]:
         "RETURN person2"
     )
 
-    query = (
+    result = family_graph.write_query(
         cypher_query,
         {"person1_id": person1_id, "person2_id": person2_id},
     )
 
-    return query
+    return result
