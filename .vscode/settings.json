@@ -6,5 +6,8 @@
   "python.linting.flake8Args": ["--max-line-length=79", "extend-ignore = E203"],
   "python.formatting.blackArgs": ["--line-length=79"],
   "python.linting.enabled": true,
-  "prettier.enable": true
+  "prettier.enable": true,
+  "python.testing.pytestArgs": ["backend/tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
