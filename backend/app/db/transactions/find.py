@@ -75,7 +75,7 @@ def find_full_siblings(person_id: str):
     cypher_query = (
         "MATCH (parent1:Person)<-[:CHILD_OF]-(:Person{id:$person_id} )"
         "-[:CHILD_OF]->(parent2:Person)<-[:CHILD_OF]-(siblings:Person)"
-        "-[:CHILD_OF]->(parent2:Person)"
+        "-[:CHILD_OF]->(parent1)"
         "RETURN DISTINCT siblings.id as id, siblings.name as name"
     )
     results = family_graph.read_query(cypher_query, {"person_id": person_id})
@@ -122,9 +122,10 @@ def find_cousins(person_id: str, degree: int = 1):
     cypher_query = (
         "MATCH (me:Person { id:$person_id})-[:CHILD_OF]->(parent:Person)"
         "-[:CHILD_OF]->(grandparents:Person)<-[:CHILD_OF]-"
-        "(unc_aunt:Person)-[:CHILD_OF]-(cousins:Person)"
-        "RETURN cousins.name, cousins.id, unc_aunt.name, unc_aunt.id,"
-        "parent.id,parent.name"
+        "(unc_aunt:Person)<-[:CHILD_OF]-(cousins:Person) "
+        "RETURN DISTINCT parent.id, parent.name,"
+        "unc_aunt.name, unc_aunt.id,"
+        "cousins.name, cousins.id"
     )
     results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
