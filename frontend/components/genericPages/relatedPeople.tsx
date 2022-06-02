@@ -1,4 +1,9 @@
-import { ToastId, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  ToastId,
+  useDisclosure,
+  useToast,
+  UseToastOptions,
+} from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -68,27 +73,31 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     const addPeopleUrl = genAddPeopleUrl(personId.toString(), newPersonId);
     const res = await fetch(addPeopleUrl, { method: "POST" });
     const addPersonData: addRelationSuccessResponse = await res.json();
-
-    errorToastIdRef.current = toast({
+    const successToastOptions: UseToastOptions = {
       title: `${title} added!`,
       description: `${addPersonData.person.name} added as ${relation}!`,
       status: "success",
       duration: 5000,
       isClosable: true,
-    });
+    };
+    toast(successToastOptions);
     onFindClose();
   };
 
   if (response.ok === false) {
     console.log(loading, response.ok);
-
-    toast({
-      title: "something went wrong!",
-      description: `${response.status} ${response.statusText}`,
-      status: "error",
+    const errorToastOptions: UseToastOptions = {
+      title: "Error!",
+      description: `${response.status}: ${response.statusText}`,
+      status: "success",
       duration: 5000,
       isClosable: true,
-    });
+    };
+    if (errorToastIdRef.current) {
+      toast.update(errorToastIdRef.current, errorToastOptions);
+    } else {
+      errorToastIdRef.current = toast(errorToastOptions);
+    }
   }
 
   return (
@@ -101,7 +110,8 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
 
       {loading
         ? `searching for ${relation}s...`
-        : peopleDetails && <SearchResults personMatches={peopleDetails} />}
+        : response.ok &&
+          peopleDetails && <SearchResults personMatches={peopleDetails} />}
 
       <FindPersonModal
         relation={relation}
