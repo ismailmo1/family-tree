@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 uri = os.environ["NEO4J_URI"]
-user = os.environ["NEO4J_USERNAME"]
-password = os.environ["NEO4J_PASSWORD"]
+user = os.environ.get("NEO4J_USERNAME", None)
+password = os.environ.get("NEO4J_PASSWORD", None)
 
 family_graph = FamilyGraph(uri, user, password)
