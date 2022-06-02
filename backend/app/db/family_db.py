@@ -1,15 +1,13 @@
 import neo4j
-from app.db.transactions.types import TransactionType
-from dotenv import load_dotenv
 from neo4j import GraphDatabase
 
 
 class FamilyGraph:
-    def __init__(self, uri: str, user: str, password: str) -> None:
+    def __init__(
+        self, uri: str, user: str | None = None, password: str | None = None
+    ) -> None:
 
-        self.driver: neo4j.Driver = GraphDatabase.driver(
-            uri, auth=(user, password)
-        )
+        self.driver: neo4j.Driver = GraphDatabase.driver(uri)
 
     def __enter__(self):
         return self

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routers import children, family, parents, people
+from app.routers import children, family, parents, people
 
 app = FastAPI()
 
