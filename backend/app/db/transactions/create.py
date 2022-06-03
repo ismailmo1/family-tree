@@ -69,7 +69,7 @@ def create_marriage(person1_id: str, person2_id: str) -> list[dict[str, str]]:
         "MATCH (person1:Person { id: $person1_id }) "
         "MATCH (person2:Person { id: $person2_id }) "
         "CREATE (person1)-[:SPOUSE_OF]->(person2) "
-        "RETURN person2"
+        "RETURN person1, person2"
     )
 
     result = family_graph.write_query(
