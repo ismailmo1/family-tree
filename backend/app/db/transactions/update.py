@@ -1,5 +1,5 @@
 from app.db import family_graph
-from app.db.transactions.find import find_person_properties
+from app.db.transactions.find import find_person_by_id
 
 
 def add_sibling(sibling_with_parent_id: str, new_sibling_id: str):
@@ -40,7 +40,7 @@ def add_parent(child_id: str, parent_id: str):
 
 def add_person_prop(person_id: str, property_map: dict):
     cypher_query = "MATCH (p:Person{ id:$person_id} ) SET p = $props RETURN p"
-    current_props = find_person_properties(person_id)
+    current_props = find_person_by_id(person_id)
     props = {**current_props, **property_map}
     result = family_graph.write_query(
         cypher_query, {"person_id": person_id, "props": props}

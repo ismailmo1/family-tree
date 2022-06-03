@@ -7,7 +7,7 @@ from app.db.transactions.find import (
     find_children,
     find_cousins,
     find_parents,
-    find_person_properties,
+    find_person_by_id,
     find_siblings,
     find_spouse,
 )
@@ -82,11 +82,11 @@ def get_nuclear_family(child_id: str = None, parent_id: str = None):
     if child_id:
         parents = find_parents(child_id)
         children = find_siblings(child_id)
-        child_props = find_person_properties(child_id)
+        child_props = find_person_by_id(child_id)
         child = child_props[0]["props"]
         children.append(child)
     if parent_id:
-        parent = find_person_properties(parent_id)[0]["props"]
+        parent = find_person_by_id(parent_id)[0]["props"]
         spouse = find_spouse(parent_id)
         parents = [*spouse, parent]
         children = find_children(parent_id)

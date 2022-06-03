@@ -18,7 +18,7 @@ def find_person_by_name(person_name: str) -> list[str]:
     return results
 
 
-def find_person_properties(person_id: str) -> list[dict[str, dict[str, str]]]:
+def find_person_by_id(person_id: str) -> list[dict[str, dict[str, str]]]:
     """return list of properties in format: [{'props':{'prop1':val1...}]
 
     Usage: person_props = find_person_properties(person_id)[0]['props']
