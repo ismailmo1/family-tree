@@ -7,7 +7,9 @@ class FamilyGraph:
         self, uri: str, user: str | None = None, password: str | None = None
     ) -> None:
 
-        self.driver: neo4j.Driver = GraphDatabase.driver(uri)
+        self.driver: neo4j.Driver = GraphDatabase.driver(
+            uri, auth=(user, password)
+        )
 
     def __enter__(self):
         return self
