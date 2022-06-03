@@ -11,7 +11,7 @@ def test_find_person_properties():
     expected_props = {
         "props": {"name": "grandad", "id": "a", "dob": "01/01/1960"}
     }
-    found_props = find.find_person_properties("a")[0]
+    found_props = find.find_person_by_id("a")[0]
     assert found_props == expected_props
 
 
@@ -106,3 +106,16 @@ def test_find_cousins():
     ]
     found_cousins = find.find_cousins("6")
     assert found_cousins == expected_cousins
+
+
+def test_find_relationship():
+    found_relationship = find.find_relationship_path("11", "2")
+
+    assert len(found_relationship) == 4
+    assert found_relationship[0].type == "CHILD_OF"
+    assert found_relationship[1].end_node.id == 11
+    assert found_relationship[2].nodes[0]._properties == {
+        "name": "family1_dad",
+        "id": "1",
+    }
+    assert found_relationship[3].start_node["name"] == "family1_dad"

@@ -120,7 +120,7 @@ def find_cousins(person_id: str, degree: int = 1):
         i.e. 1 = first cousin, 2 = second etc. Defaults to 1.
     """
     cypher_query = (
-        "MATCH (me:Person { id:$person_id})-[:CHILD_OF]->(parent:Person)"
+        "MATCH (me:Person {id:$person_id})-[:CHILD_OF]->(parent:Person)"
         "-[:CHILD_OF]->(grandparents:Person)<-[:CHILD_OF]-"
         "(unc_aunt:Person)<-[:CHILD_OF]-(cousins:Person) "
         "RETURN DISTINCT parent.id, parent.name,"
@@ -130,3 +130,19 @@ def find_cousins(person_id: str, degree: int = 1):
     results = family_graph.read_query(cypher_query, {"person_id": person_id})
 
     return results
+
+
+def find_relationship_path(person1_id: str, person2_id: str) -> tuple:
+    cypher_query = (
+        "MATCH p =shortestPath((:Person {id:$person1_id})"
+        "-[*1..100]-(:Person {id:$person2_id}))"
+        "RETURN p"
+    )
+
+    results = family_graph.read_query(
+        cypher_query, {"person1_id": person1_id, "person2_id": person2_id}
+    )
+
+    relationships = results[0]["p"].relationships
+
+    return relationships
