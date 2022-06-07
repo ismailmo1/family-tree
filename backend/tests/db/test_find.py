@@ -121,8 +121,11 @@ def test_find_relationship():
     found_relationship = find.find_relationship_path("11", "2")
 
     assert len(found_relationship) == 4
-    assert found_relationship[0].type == "CHILD_OF"
-    assert found_relationship[1].end_node.id == 7
+    assert (
+        found_relationship[0]._start_node._properties["name"]
+        == "family2_child1"
+    )
+    found_relationship[1].type == "CHILD_OF"
     assert found_relationship[2].nodes[0]._properties == {
         "name": "family1_dad",
         "id": "1",
