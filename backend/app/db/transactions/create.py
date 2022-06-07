@@ -52,6 +52,26 @@ def add_child(
     return result
 
 
+def create_user(
+    person_name: str, username: str, hashed_password: str
+) -> dict[str, str]:
+    cypher_query = (
+        "CREATE (person:Person { name: $person_name, id: $id, username:$username, hashed_password:$hashed_password }) "
+        "RETURN person.name as name, person.id as id"
+    )
+    result = family_graph.write_query(
+        cypher_query,
+        {
+            "person_name": person_name,
+            "id": str(uuid4()),
+            "username": username,
+            "hashed_password": hashed_password,
+        },
+    )
+
+    return result
+
+
 def create_person(person_name: str) -> dict[str, str]:
     cypher_query = (
         "CREATE (person:Person { name: $person_name, id: $id }) "

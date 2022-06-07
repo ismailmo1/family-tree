@@ -2,7 +2,7 @@
 // people
 CREATE (dad:Person {name:'family1_dad', id:"1"})
 CREATE (mum:Person {name:'family1_mum', id:"2"})
-CREATE (child1:Person {name:'family1_child1', id:"3"})
+CREATE (child1:Person {name:'family1_child1', id:"3", username:'user1', hashed_password:'$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW'})
 CREATE (child2:Person {name:'family1_child2', id:"4"})
 CREATE (child3:Person {name:'family1_child3', id:"5"})
 CREATE (child4:Person {name:'family1_child4', id:"6"})

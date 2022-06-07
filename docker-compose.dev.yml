@@ -9,6 +9,9 @@ services:
     ports: ["3000:3000", "8000:8000"]
     environment:
       NEO4J_URI: bolt://db:7687
+      SECRET_KEY: test
+      JWT_ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
     command: sleep infinity
     depends_on:
       - db

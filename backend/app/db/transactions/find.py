@@ -1,6 +1,25 @@
 from app.db import family_graph
 
 
+def find_person_by_username(username: str) -> dict[str, str]:
+    """Find person node that matches username
+
+    Args:
+        username (str): username to search for
+
+    Returns:
+        dict[str, str]: list of people ids: [<ID1>, <ID2>...]
+    """
+    cypher_query = (
+        "MATCH (p:Person { username:$username }) RETURN properties(p) as props"
+    )
+    first_match = family_graph.read_query(
+        cypher_query, {"username": username}
+    )[0]["props"]
+
+    return first_match
+
+
 def find_person_by_name(person_name: str) -> list[str]:
     """Find person nodes that match name
 
