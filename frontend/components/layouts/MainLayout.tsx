@@ -13,7 +13,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: "Edit", link: "/edit" },
   ];
   const avatarLinks: NavItem[] = [
-    { text: "Sign Out", link: "/signout" },
+    { text: "Login", link: "/login" },
     { text: "Account Settings", link: "/account-settings" },
   ];
 
