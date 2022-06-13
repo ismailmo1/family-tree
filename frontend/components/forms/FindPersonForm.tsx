@@ -9,6 +9,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import React, { MouseEvent, useCallback, useRef, useState } from "react";
+import { API_URL } from "../../globals";
 import { PersonMatchResult } from "../../types/person";
 
 interface ClickableCard extends PersonMatchResult {
@@ -35,7 +36,7 @@ const FindForm: React.FC<FindFormProps> = ({
   const searchPerson = useCallback(async () => {
     setIsFetching(true);
     const res: Response = await fetch(
-      `http://localhost:8000/people/?name=${personName.current?.value}`
+      `${API_URL}/people/?name=${personName.current?.value}`
     );
     const peopleMatches: PersonMatchResult[] = await res.json();
     setPersonMatches(peopleMatches);

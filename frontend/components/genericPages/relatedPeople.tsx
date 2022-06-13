@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useFetch } from "use-http";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
+import { API_URL } from "../../globals";
 import { PersonMatchResult } from "../../types/person";
 import { addRelationSuccessResponse } from "../../types/relationships";
 import RelationHeader from "../headers/RelationHeader";
@@ -46,9 +47,8 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const toast = useToast();
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
 
-  const { loading, error, response, request } = useFetch<PersonMatchResult[]>(
-    "http://localhost:8000"
-  );
+  const { loading, error, response, request } =
+    useFetch<PersonMatchResult[]>(API_URL);
 
   const fetchPeople = useCallback(
     async (url: string) => {

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import FamilyTree from "../../components/cards/FamilyTree";
+import { API_URL } from "../../globals";
 import { NuclearFamily } from "../../types/family";
 
 const FamilyPage: NextPage = () => {
@@ -19,7 +20,7 @@ const FamilyPage: NextPage = () => {
 
     const fetchFamily = async () => {
       const res = await fetch(
-        `http://localhost:8000/family/nuclear?${perspective}_id=${personId}`
+        `${API_URL}/family/nuclear?${perspective}_id=${personId}`
       );
       const data: NuclearFamily = await res.json();
       setFamily(data);

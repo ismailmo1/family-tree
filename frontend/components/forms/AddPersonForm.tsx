@@ -12,6 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useCallback, useRef, useState } from "react";
+import { API_URL } from "../../globals";
 import { PersonMatchResult } from "../../types/person";
 
 const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
@@ -49,7 +50,7 @@ const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
     }
     setIsAdding(true);
     const res = await fetch(
-      `http://localhost:8000/people/?name=${personName.current.value}`,
+      `${API_URL}:8000/people/?name=${personName.current.value}`,
       { method: "POST" }
     );
     const data: PersonMatchResult = await res.json();

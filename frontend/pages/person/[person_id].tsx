@@ -3,6 +3,7 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SearchResults from "../../components/cards/SearchResults";
+import { API_URL } from "../../globals";
 import { PersonMatchResult } from "../../types/person";
 
 const PersonPage: NextPage = () => {
@@ -16,7 +17,7 @@ const PersonPage: NextPage = () => {
     }
 
     const fetchPersonDetails = async () => {
-      const res = await fetch(`http://localhost:8000/people/?id=${personId}`);
+      const res = await fetch(`${API_URL}/people/?id=${personId}`);
       const data: PersonMatchResult[] = await res.json();
       setPersonDetails(data);
     };
