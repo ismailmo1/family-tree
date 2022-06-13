@@ -13,9 +13,12 @@ def find_person_by_username(username: str) -> dict[str, str]:
     cypher_query = (
         "MATCH (p:Person { username:$username }) RETURN properties(p) as props"
     )
-    first_match = family_graph.read_query(
-        cypher_query, {"username": username}
-    )[0]["props"]
+    try:
+        first_match = family_graph.read_query(
+            cypher_query, {"username": username}
+        )[0]["props"]
+    except IndexError:
+        raise Exception("No person found!")
 
     return first_match
 
