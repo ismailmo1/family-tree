@@ -51,7 +51,10 @@ const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
     setIsAdding(true);
     const res = await fetch(
       `${API_URL}:8000/people/?name=${personName.current.value}`,
-      { method: "POST" }
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      }
     );
     const data: PersonMatchResult = await res.json();
 

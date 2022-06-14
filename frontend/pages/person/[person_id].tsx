@@ -17,7 +17,9 @@ const PersonPage: NextPage = () => {
     }
 
     const fetchPersonDetails = async () => {
-      const res = await fetch(`${API_URL}/people/?id=${personId}`);
+      const res = await fetch(`${API_URL}/people/?id=${personId}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       const data: PersonMatchResult[] = await res.json();
       setPersonDetails(data);
     };

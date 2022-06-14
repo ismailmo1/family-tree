@@ -47,8 +47,10 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const toast = useToast();
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
 
-  const { loading, error, response, request } =
-    useFetch<PersonMatchResult[]>(API_URL);
+  const { loading, error, response, request } = useFetch<PersonMatchResult[]>(
+    API_URL,
+    { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
+  );
 
   const fetchPeople = useCallback(
     async (url: string) => {
@@ -89,7 +91,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     const errorToastOptions: UseToastOptions = {
       title: "Error!",
       description: `${response.status}: ${response.statusText}`,
-      status: "success",
+      status: "error",
       duration: 5000,
       isClosable: true,
     };

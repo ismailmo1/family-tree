@@ -20,7 +20,10 @@ const FamilyPage: NextPage = () => {
 
     const fetchFamily = async () => {
       const res = await fetch(
-        `${API_URL}/family/nuclear?${perspective}_id=${personId}`
+        `${API_URL}/family/nuclear?${perspective}_id=${personId}`,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        }
       );
       const data: NuclearFamily = await res.json();
       setFamily(data);
