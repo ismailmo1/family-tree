@@ -1,8 +1,11 @@
 from app.db.transactions.find import find_parents
 from app.db.transactions.update import add_parent
-from fastapi import APIRouter
+from app.routers import auth
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix="/parents")
+router = APIRouter(
+    prefix="/parents", dependencies=[Depends(auth.get_current_user)]
+)
 
 
 @router.get("/")

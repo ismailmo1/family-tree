@@ -11,9 +11,12 @@ from app.db.transactions.find import (
     find_siblings,
     find_spouse,
 )
-from fastapi import APIRouter
+from app.routers import auth
+from fastapi import APIRouter, Depends
 
-router = APIRouter(prefix="/family")
+router = APIRouter(
+    prefix="/family", dependencies=[Depends(auth.get_current_user)]
+)
 
 
 @router.post("/spouse")

@@ -1,11 +1,11 @@
 from app.db.transactions.create import create_person
-from app.db.transactions.find import (
-    find_person_by_name,
-    find_person_by_id,
-)
-from fastapi import APIRouter, HTTPException
+from app.db.transactions.find import find_person_by_id, find_person_by_name
+from app.routers import auth
+from fastapi import APIRouter, Depends, HTTPException
 
-router = APIRouter(prefix="/people")
+router = APIRouter(
+    prefix="/people", dependencies=[Depends(auth.get_current_user)]
+)
 
 
 @router.get("/")
