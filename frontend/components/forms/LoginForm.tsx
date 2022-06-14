@@ -23,12 +23,14 @@ const LoginForm = () => {
   const [usernameInput, setUsernameInput] = useState<string>("");
   const [passwordInput, setPasswordInput] = useState<string>("");
   const { loading, error, response, request } = useFetch<JWTResponse>(API_URL);
+
   const loginUser = async () => {
     const data = new FormData();
     data.append("username", usernameInput);
     data.append("password", passwordInput);
     const res = await request.post("/auth/token", data);
-    console.log(res.access_token);
+    localStorage.setItem("token", res.access_token);
+
     const successToastOptions: UseToastOptions = {
       title: "logged in!",
       status: "success",
@@ -36,8 +38,8 @@ const LoginForm = () => {
       isClosable: true,
     };
     toast(successToastOptions);
-    // return res.access_token;
   };
+
   if (response.ok === false) {
     const errorToastOptions: UseToastOptions = {
       title: "Login Failed!",
