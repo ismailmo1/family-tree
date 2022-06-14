@@ -37,7 +37,7 @@ const FindForm: React.FC<FindFormProps> = ({
     setIsFetching(true);
     const res: Response = await fetch(
       `${API_URL}/people/?name=${personName.current?.value}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token`")}` } }
+      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
     );
     const peopleMatches: PersonMatchResult[] = await res.json();
     setPersonMatches(peopleMatches);
