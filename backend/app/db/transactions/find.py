@@ -24,16 +24,19 @@ def find_person_by_username(username: str) -> dict[str, str]:
 
 
 def find_person_by_name(person_name: str) -> list[str]:
-    """Find person nodes that match name
+    """Find person nodes that contain name
 
     Args:
-        tx (neo4j.Transaction): OMIT this argument - it is automatically passed in by neo4j
+        person_name (str): person name to search for
         person_name (str): the name to search for
 
     Returns:
         list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
     """
-    cypher_query = "MATCH (p:Person { name:$person_name }) RETURN p.id as id"
+    cypher_query = (
+        "MATCH (p:Person) WHERE p.name CONTAINS $person_name "
+        "RETURN p.id as id"
+    )
     results = family_graph.read_query(
         cypher_query, {"person_name": person_name}
     )
