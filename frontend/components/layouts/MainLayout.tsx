@@ -1,4 +1,5 @@
 import { Container } from "@chakra-ui/react";
+import { useUser } from "../../hooks/useUser";
 import NavBar, { NavItem } from "../navigation/NavBar";
 
 interface LayoutProps {
@@ -6,16 +7,26 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { isLoggedIn, token } = useUser();
+
   const mainLinks: NavItem[] = [
     { text: "Find", link: "/find" },
     { text: "New", link: "/new" },
     { text: "Explore", link: "/explore" },
     { text: "Edit", link: "/edit" },
   ];
-  const avatarLinks: NavItem[] = [
+
+  let avatarLinks: NavItem[] = [
     { text: "Login", link: "/login" },
     { text: "Account Settings", link: "/account-settings" },
   ];
+
+  if (isLoggedIn) {
+    avatarLinks = [
+      { text: "Logout", link: "/logout" },
+      { text: "Account Settings", link: "/account-settings" },
+    ];
+  }
 
   return (
     <>

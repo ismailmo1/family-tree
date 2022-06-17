@@ -4,59 +4,22 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Spinner,
-  ToastId,
-  useToast,
-  UseToastOptions,
 } from "@chakra-ui/react";
-import { useRef, useState } from "react";
-import { useFetch } from "use-http";
-import { API_URL } from "../../globals";
+import { useState } from "react";
+import { useUser } from "../../hooks/useUser";
 
-interface JWTResponse {
-  access_token: string;
-  token_type: string;
-}
 const LoginForm = () => {
-  const toast = useToast();
-  const errorToastIdRef = useRef<ToastId>();
   const [usernameInput, setUsernameInput] = useState<string>("");
   const [passwordInput, setPasswordInput] = useState<string>("");
-  const { loading, error, response, request } = useFetch<JWTResponse>(API_URL);
 
-  const loginUser = async () => {
-    const data = new FormData();
-    data.append("username", usernameInput);
-    data.append("password", passwordInput);
-    const res = await request.post("/auth/token", data);
-    localStorage.setItem("token", res.access_token);
+  const { isLoggedIn, loginUser } = useUser();
 
-    const successToastOptions: UseToastOptions = {
-      title: "logged in!",
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    };
-    toast(successToastOptions);
+  const loginUserHandler = () => {
+    loginUser(usernameInput, passwordInput);
   };
 
-  if (response.ok === false) {
-    const errorToastOptions: UseToastOptions = {
-      title: "Login Failed!",
-      description: `${response.status}: ${response.statusText}`,
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-    };
-    if (errorToastIdRef.current) {
-      toast.update(errorToastIdRef.current, errorToastOptions);
-    } else {
-      errorToastIdRef.current = toast(errorToastOptions);
-    }
-  }
-
-  if (loading) {
-    return <Spinner size={"xl"} />;
+  if (isLoggedIn) {
+    return <Center>Already Logged In!</Center>;
   }
 
   return (
@@ -70,7 +33,7 @@ const LoginForm = () => {
         onChange={(e) => setPasswordInput(e.target.value)}
       />
       <Center py="5">
-        <Button onClick={loginUser}>Login</Button>
+        <Button onClick={loginUserHandler}>Login</Button>
       </Center>
     </FormControl>
   );
