@@ -9,5 +9,9 @@
   "prettier.enable": true,
   "python.testing.pytestArgs": ["backend/tests"],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.organizeImports": false
+  }
 }
