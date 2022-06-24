@@ -1,5 +1,5 @@
 import { Container } from "@chakra-ui/react";
-import { useUser } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/use-auth";
 import NavBar, { NavItem } from "../navigation/NavBar";
 
 interface LayoutProps {
@@ -7,7 +7,7 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { isLoggedIn, token } = useUser();
+  const auth = useAuth();
 
   const mainLinks: NavItem[] = [
     { text: "Find", link: "/find" },
@@ -21,7 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     { text: "Account Settings", link: "/account-settings" },
   ];
 
-  if (isLoggedIn) {
+  if (auth.token) {
     avatarLinks = [
       { text: "Logout", link: "/logout" },
       { text: "Account Settings", link: "/account-settings" },

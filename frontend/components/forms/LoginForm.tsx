@@ -6,19 +6,19 @@ import {
   Input,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { useUser } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/use-auth";
 
 const LoginForm = () => {
   const [usernameInput, setUsernameInput] = useState<string>("");
   const [passwordInput, setPasswordInput] = useState<string>("");
 
-  const { isLoggedIn, loginUser } = useUser();
+  const { token, user, signin } = useAuth();
 
   const loginUserHandler = () => {
-    loginUser(usernameInput, passwordInput);
+    signin(usernameInput, passwordInput);
   };
 
-  if (isLoggedIn) {
+  if (token) {
     return <Center>Already Logged In!</Center>;
   }
 
