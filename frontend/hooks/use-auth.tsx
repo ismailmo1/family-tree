@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-import useFetch from "use-http";
+import useFetch, { Provider } from "use-http";
 import { API_URL } from "../globals";
 
 interface JWTResponse {
@@ -93,7 +93,10 @@ interface ProvideAuthProps {
 }
 
 export function ProvideAuth(props: ProvideAuthProps) {
+  // auth context provider
+
   const auth = useProvideAuth();
+
   return (
     <authContext.Provider value={auth}>{props.children}</authContext.Provider>
   );
@@ -108,21 +111,26 @@ function useProvideAuth() {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetailsResponse | null>(null);
   const { request: loginRequest } = useFetch<JWTResponse>(API_URL);
-  const { request: userRequest } = useFetch<UserDetailsResponse>(API_URL, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
 
   useEffect(() => {
     const getUser = async () => {
-      const res = await userRequest.get("/auth/users/me");
-      setUser(res);
+      try {
+        // fetch api since useFetch doesnt allow changing headers
+        // HACK: cant get provider to work for now :(
+        const res = await fetch(`${API_URL}/auth/users/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const userData: UserDetailsResponse = await res.json();
+        setUser(userData);
+      } catch {
+        console.log("user detail fetch failed");
+      }
     };
-    if (token !== null) {
-      console.log("grabbing user details " + token);
 
+    if (token !== null) {
       getUser();
     }
-  }, [userRequest, token]);
+  }, [token]);
 
   const signin = async (username: string, password: string) => {
     const data = new FormData();
@@ -134,6 +142,8 @@ function useProvideAuth() {
   const signup = (username: string, password: string) => {};
 
   const signout = () => {
+    console.log("signing out");
+
     setToken(null);
     setUser(null);
   };
