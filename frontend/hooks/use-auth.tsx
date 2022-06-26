@@ -15,6 +15,12 @@ interface JWTResponse {
   access_token: string;
   token_type: string;
 }
+interface UserDetailsResponse {
+  username: string;
+  hashed_password: string;
+  name: string;
+  id: string;
+}
 
 const successToastOptions: UseToastOptions = {
   title: "logged in!",
@@ -71,7 +77,7 @@ export const useUser = () => {
 };
 
 interface AuthCtxInterface {
-  user: string | null;
+  user: UserDetailsResponse | null;
   token: string | null;
   signin: (username: string, password: string) => void;
   signup: (username: string, password: string) => void;
@@ -99,17 +105,30 @@ export const useAuth = () => {
 };
 // Provider hook that creates auth object and handles state
 function useProvideAuth() {
-  const { response, request } = useFetch<JWTResponse>(API_URL);
-
-  const [user, setUser] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<UserDetailsResponse | null>(null);
+  const { request: loginRequest } = useFetch<JWTResponse>(API_URL);
+  const { request: userRequest } = useFetch<UserDetailsResponse>(API_URL, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  useEffect(() => {
+    const getUser = async () => {
+      const res = await userRequest.get("/auth/users/me");
+      setUser(res);
+    };
+    if (token !== null) {
+      console.log("grabbing user details " + token);
+
+      getUser();
+    }
+  }, [userRequest, token]);
 
   const signin = async (username: string, password: string) => {
     const data = new FormData();
     data.append("username", username);
     data.append("password", password);
-    const res = await request.post("/auth/token", data);
-    setUser(res.username);
+    const res = await loginRequest.post("/auth/token", data);
     setToken(res.access_token);
   };
   const signup = (username: string, password: string) => {};
@@ -119,12 +138,8 @@ function useProvideAuth() {
     setUser(null);
   };
 
-  // Subscribe to user on mount
-  // Because this sets state in the callback it will cause any ...
-  // ... component that utilizes this hook to re-render with the ...
-  // ... latest auth object.
-  useEffect(() => {}, []);
   // Return the user object and auth methods
+
   return {
     user,
     token,
