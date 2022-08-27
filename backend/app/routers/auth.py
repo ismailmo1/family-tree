@@ -1,15 +1,16 @@
-import os
-from datetime import timedelta
+from app.dependencies.auth import (
+    authenticate_user,
+    create_refresh_token,
+    get_current_user,
+    create_access_token,
+)
+from app.models.token import Token
 
-from app.dependencies.auth import authenticate_user, get_current_user
-from app.models.token import Token, create_access_token
 from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES")
-)
+
 router = APIRouter(prefix="/auth")
 
 
@@ -30,8 +31,20 @@ async def login(
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+    access_token = create_access_token(data={"sub": user.username})
+    refresh_token = create_refresh_token(data={"sub": user.username})
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@router.post("/refresh", response_model=Token)
+async def refresh_token(current_user: User = Depends(get_current_user)):
+    print("refreshing")
+    return {}
+
+
+# TODO add signup - check for existing username/email then add node
+# TODO add invite link for family members to prevent duplicate nodes+graphs
