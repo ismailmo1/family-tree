@@ -23,7 +23,7 @@
     },
     {
       "name": "Next.js: debug client-side",
-      "type": "pwa-chrome",
+      "type": "chrome",
       "request": "launch",
       "cwd": "${workspaceFolder}/frontend",
       "url": "http://localhost:3000"
