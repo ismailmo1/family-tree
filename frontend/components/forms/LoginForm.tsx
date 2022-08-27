@@ -13,13 +13,15 @@ const LoginForm = () => {
   const [passwordInput, setPasswordInput] = useState<string>("");
 
   const { token, user, signin } = useAuth();
+  console.log(token, user);
 
   const loginUserHandler = () => {
     signin(usernameInput, passwordInput);
   };
 
   if (token) {
-    return <Center>Already Logged In!</Center>;
+    const text = `Already Logged in as ${user?.name}`;
+    return <Center>{text}</Center>;
   }
 
   return (
