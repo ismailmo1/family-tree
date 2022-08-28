@@ -1,7 +1,5 @@
 import os
-from datetime import datetime, timedelta
 
-from jose import jwt
 from pydantic import BaseModel
 
 SECRET_KEY = os.environ.get("SECRET_KEY")

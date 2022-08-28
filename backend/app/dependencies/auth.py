@@ -2,22 +2,31 @@ import os
 from datetime import timedelta, datetime
 
 from app.db.transactions.find import find_person_by_username
-from app.models.token import Token, TokenData
 from app.models.user import User
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+from jose import jwt
+from jose.exceptions import JWTClaimsError
 from passlib.context import CryptContext
 
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
+from app.dependencies.exceptions import (
+    InvalidCredentialsError,
+    UserNotFoundError,
 )
-REFRESH_TOKEN_EXPIRE_MINUTES = int(
-    os.environ.get("REFRESH_TOKEN_EXPIRE_MINUTES", 1440)
-)
-SECRET_KEY = os.environ.get("SECRET_KEY")
-REFRESH_SECRET_KEY = os.environ.get("REFRESH_SECRET_KEY")
-ALGORITHM = os.environ.get("JWT_ALGORITHM")
+
+# register env variables
+try:
+    ALGORITHM = os.environ["JWT_ALGORITHM"]
+    ACCESS_TOKEN_EXPIRE_MINUTES = 0  # int(
+    #     os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]
+    # )
+    SECRET_KEY = os.environ["SECRET_KEY"]
+    REFRESH_SECRET_KEY = "test22"  # os.environ["REFRESH_SECRET_KEY"]
+    REFRESH_TOKEN_EXPIRE_MINUTES = 30  # int(
+    #     os.environ["REFRESH_TOKEN_EXPIRE_MINUTES"]
+    # )
+except KeyError as e:
+    raise Exception(f"Environment variable missing: {e}")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -52,21 +61,41 @@ credentials_exception = HTTPException(
 )
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
+        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        username = payload.get("sub")
         if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
+            raise InvalidCredentialsError
+    except JWTClaimsError:
+        raise InvalidCredentialsError
 
-    if token_data.username:
-        user = get_user(username=token_data.username)
-        if user is None:
-            raise credentials_exception
-        return user
+    user = get_user(username=username)
+    if user is None:
+        raise UserNotFoundError
+    return user
+
+
+def get_refresh_user(refresh_token: str) -> User:
+    try:
+        payload = jwt.decode(
+            refresh_token, REFRESH_SECRET_KEY, algorithms=ALGORITHM
+        )
+        username = payload.get("sub")
+        if username is None:
+            raise InvalidCredentialsError
+    except JWTClaimsError:
+        raise InvalidCredentialsError
+
+    if check_token_blacklist(refresh_token):
+        # token is blacklisted
+        raise InvalidCredentialsError
+
+    user = get_user(username=username)
+    if user is None:
+        raise UserNotFoundError
+
+    return user
 
 
 def create_access_token(
@@ -99,3 +128,14 @@ def create_refresh_token(
         to_encode, REFRESH_SECRET_KEY, algorithm=ALGORITHM
     )
     return encoded_jwt
+
+
+def blacklist_refresh_token(refresh_token: str) -> None:
+    # TODO store refresh tokens somewhere and add invalid/valid flags
+    pass
+
+
+def check_token_blacklist(refresh_token: str) -> bool:
+    """Returns true if token is blacklisted"""
+    # TODO check if refresh token isn't in blacklist
+    return False
