@@ -1,6 +1,23 @@
+from fastapi import HTTPException, status
+
+
 class UserNotFoundError(Exception):
     pass
 
 
-class InvalidCredentialsError(Exception):
-    pass
+class InvalidCredentialsError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+class ExpiredTokenError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token Expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )

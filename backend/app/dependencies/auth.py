@@ -3,13 +3,15 @@ from datetime import timedelta, datetime
 
 from app.db.transactions.find import find_person_by_username
 from app.models.user import User
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
 from jose.exceptions import JWTClaimsError
 from passlib.context import CryptContext
+from jose.exceptions import ExpiredSignatureError
 
 from app.dependencies.exceptions import (
+    ExpiredTokenError,
     InvalidCredentialsError,
     UserNotFoundError,
 )
@@ -17,9 +19,9 @@ from app.dependencies.exceptions import (
 # register env variables
 try:
     ALGORITHM = os.environ["JWT_ALGORITHM"]
-    ACCESS_TOKEN_EXPIRE_MINUTES = 0  # int(
-    #     os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]
-    # )
+    ACCESS_TOKEN_EXPIRE_MINUTES = int(
+        os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]
+    )
     SECRET_KEY = os.environ["SECRET_KEY"]
     REFRESH_SECRET_KEY = "test22"  # os.environ["REFRESH_SECRET_KEY"]
     REFRESH_TOKEN_EXPIRE_MINUTES = 30  # int(
@@ -46,19 +48,14 @@ def get_password_hash(password):
 
 
 def authenticate_user(username: str, password: str) -> User:
-    user = get_user(username)
-    if not user:
-        raise credentials_exception
+    try:
+        user = get_user(username)
+    except UserNotFoundError:
+        # dont want to specify to user if pass or username is wrong
+        raise InvalidCredentialsError
     if not verify_password(password, user.hashed_password):
-        raise credentials_exception
+        raise InvalidCredentialsError
     return user
-
-
-credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
@@ -69,7 +66,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
             raise InvalidCredentialsError
     except JWTClaimsError:
         raise InvalidCredentialsError
-
+    except ExpiredSignatureError:
+        raise ExpiredTokenError
     user = get_user(username=username)
     if user is None:
         raise UserNotFoundError

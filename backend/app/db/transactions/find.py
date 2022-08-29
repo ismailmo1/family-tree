@@ -1,4 +1,5 @@
 from app.db import family_graph
+from app.dependencies.exceptions import UserNotFoundError
 
 
 def find_person_by_username(username: str) -> dict[str, str]:
@@ -18,7 +19,7 @@ def find_person_by_username(username: str) -> dict[str, str]:
             cypher_query, {"username": username}
         )[0]["props"]
     except IndexError:
-        raise Exception("No person found!")
+        raise UserNotFoundError(f"No person matching {username} found!")
 
     return first_match
 
