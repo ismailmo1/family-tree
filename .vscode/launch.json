@@ -12,7 +12,15 @@
       "cwd": "${workspaceFolder}/backend",
       "args": ["app.main:app", "--reload"],
       "jinja": true,
-      "justMyCode": true
+      "justMyCode": true,
+      "env": {
+        "NEO4J_URI": "bolt://localhost:7687",
+        "SECRET_KEY": "test",
+        "REFRESH_SECRET_KEY": "test2",
+        "JWT_ALGORITHM": "HS256",
+        "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+        "REFRESH_TOKEN_EXPIRE_MINUTES": "1440"
+      }
     },
     {
       "name": "Next.js: debug server-side",
@@ -33,6 +41,8 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "npm run dev",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**"],
       "cwd": "${workspaceFolder}/frontend",
       "serverReadyAction": {
         "pattern": "started server on .+, url: (https?://.+)",
