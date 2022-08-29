@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import Link from "next/link";
 import { ReactNode } from "react";
+import { useAuth } from "../../hooks/use-auth";
 import NavLink from "./NavLink";
 
 export interface NavItem {
@@ -25,12 +26,30 @@ export interface NavItem {
 interface NavBarProps {
   children?: ReactNode;
   mainLinks: NavItem[];
-  avatarLinks: NavItem[];
 }
 
-const NavBar: React.FC<NavBarProps> = ({ mainLinks, avatarLinks }) => {
+const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { user } = useAuth();
 
+  const accountNavLinks = user ? (
+    <Menu>
+      <MenuButton as={Button} rounded={"full"} cursor={"pointer"} minW={0}>
+        {user.username}
+      </MenuButton>
+
+      <MenuList>
+        <MenuItem key="/account-settings">
+          <Link href="/account-settings">Account Settings</Link>
+        </MenuItem>
+        <MenuItem key="/logout">
+          <Link href="/logout">Logout</Link>
+        </MenuItem>
+      </MenuList>
+    </Menu>
+  ) : (
+    <Link href="/login">Login</Link>
+  );
   return (
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
@@ -58,26 +77,7 @@ const NavBar: React.FC<NavBarProps> = ({ mainLinks, avatarLinks }) => {
               ))}
             </HStack>
           </HStack>
-          <Flex alignItems={"center"}>
-            <Menu>
-              <MenuButton
-                as={Button}
-                rounded={"full"}
-                cursor={"pointer"}
-                minW={0}
-              >
-                Your Account
-              </MenuButton>
-
-              <MenuList>
-                {avatarLinks.map((link) => (
-                  <MenuItem key={link.link}>
-                    <Link href={link.link}>{link.text}</Link>
-                  </MenuItem>
-                ))}
-              </MenuList>
-            </Menu>
-          </Flex>
+          <Flex alignItems={"center"}>{accountNavLinks}</Flex>
         </Flex>
 
         {isOpen ? (
