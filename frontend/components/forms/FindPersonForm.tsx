@@ -10,6 +10,7 @@ import {
 } from "@chakra-ui/react";
 import React, { MouseEvent, useCallback, useRef, useState } from "react";
 import { API_URL } from "../../globals";
+import { useAuth } from "../../hooks/use-auth";
 import { PersonMatchResult } from "../../types/person";
 
 interface ClickableCard extends PersonMatchResult {
@@ -29,18 +30,23 @@ const FindForm: React.FC<FindFormProps> = ({
   onClick,
 }) => {
   const personName = useRef<HTMLInputElement>(null);
-  const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>([]);
+  const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [cardLoading, setCardLoading] = useState<boolean>(false);
-
+  const { authFetch } = useAuth();
   const searchPerson = useCallback(async () => {
     setIsFetching(true);
-    const res: Response = await fetch(
-      `${API_URL}/people/?name=${personName.current?.value}`,
-      { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-    );
-    const peopleMatches: PersonMatchResult[] = await res.json();
-    setPersonMatches(peopleMatches);
+
+    try {
+      const data = await authFetch<PersonMatchResult[]>(
+        `${API_URL}/people/?name=${personName.current?.value}`
+      );
+      const peopleMatches: PersonMatchResult[] = data;
+      setPersonMatches(peopleMatches);
+    } catch (error) {
+      console.log(error);
+      return;
+    }
 
     setIsFetching(false);
   }, []);
@@ -54,15 +60,17 @@ const FindForm: React.FC<FindFormProps> = ({
     [onClick]
   );
 
-  const peopleMatchCards = personMatches.map((p) => (
-    <PersonCard
-      key={p.id}
-      name={p.name}
-      id={p.id}
-      onClick={onCardClick}
-      isLoading={cardLoading}
-    />
-  ));
+  const peopleMatchCards =
+    personMatches &&
+    personMatches.map((p) => (
+      <PersonCard
+        key={p.id}
+        name={p.name}
+        id={p.id}
+        onClick={onCardClick}
+        isLoading={cardLoading}
+      />
+    ));
   const skeletonCard = (
     <Skeleton width="100%" rounded="lg">
       <PersonCard key="dummy" name="dummy" id="dummy" />
@@ -89,7 +97,7 @@ const FindForm: React.FC<FindFormProps> = ({
           </>
         ) : (
           <>
-            {peopleMatchCards.length > 0 && (
+            {peopleMatchCards && peopleMatchCards.length > 0 && (
               <Text alignSelf="flex-start">{searchHeading}</Text>
             )}
             {peopleMatchCards}
