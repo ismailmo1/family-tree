@@ -1,4 +1,5 @@
 import { ToastId, useToast, UseToastOptions } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import {
   createContext,
   ReactNode,
@@ -67,6 +68,7 @@ function useProvideAuth() {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetailsResponse | null>(null);
   const { request: loginRequest } = useFetch<JWTResponse>(API_URL);
+  const router = useRouter();
   let storedToken: string | null;
   if (typeof window !== "undefined") {
     // we are client side and have localStorage access
@@ -150,11 +152,12 @@ function useProvideAuth() {
       });
       if (res.ok) {
         const data: FetchedResponse = await res.json();
+        console.log("fetch succeeded ");
+
         return data;
       } else {
         // force catch block execution
-        console.log(res);
-
+        console.dir(res);
         throw Error;
       }
     } catch {
@@ -162,7 +165,23 @@ function useProvideAuth() {
       throw Error;
     }
   }
-  async function getNewAccessToken() {}
+  async function getNewAccessToken(refreshToken: string) {
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`);
+      if (res.statusText === "Token expired") {
+        // user needs to login again
+        console.log("refresh token expired");
+        router.push("/login");
+      } else {
+        const data = await res.json();
+        console.log(data);
+      }
+    } catch (error) {
+      console.log(error);
+
+      router.push("/login");
+    }
+  }
 
   // Return the user object and auth methods
 
