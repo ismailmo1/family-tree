@@ -10,10 +10,12 @@ import {
   MenuItem,
   MenuList,
   Stack,
+  Text,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { ReactNode } from "react";
 import { useAuth } from "../../hooks/use-auth";
 import NavLink from "./NavLink";
@@ -30,7 +32,7 @@ interface NavBarProps {
 
 const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { user } = useAuth();
+  const { user, signout } = useAuth();
 
   const accountNavLinks = user ? (
     <Menu>
@@ -43,7 +45,7 @@ const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
           <Link href="/account-settings">Account Settings</Link>
         </MenuItem>
         <MenuItem key="/logout">
-          <Link href="/logout">Logout</Link>
+          <Text onClick={() => signout()}>Logout</Text>
         </MenuItem>
       </MenuList>
     </Menu>
