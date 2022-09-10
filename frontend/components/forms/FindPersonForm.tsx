@@ -41,7 +41,7 @@ const FindForm: React.FC<FindFormProps> = ({
       const data = await authFetch<PersonMatchResult[]>(
         `${API_URL}/people/?name=${personName.current?.value}`
       );
-      const peopleMatches: PersonMatchResult[] = data;
+      const peopleMatches: PersonMatchResult[] | undefined = data;
       setPersonMatches(peopleMatches);
     } catch (error) {
       console.log(error);
