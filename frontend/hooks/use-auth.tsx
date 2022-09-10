@@ -12,7 +12,6 @@ import useFetch, { Provider, UseFetchArgsReturn } from "use-http";
 import { API_URL } from "../globals";
 
 interface JWTResponse {
-  username: string;
   access_token: string;
   refresh_token: string;
   token_type: string;
@@ -37,7 +36,9 @@ interface AuthCtxInterface {
   signin: (username: string, password: string) => void;
   signup: (username: string, password: string) => void;
   signout: () => void;
-  authFetch: <FetchedResponse>(endpoint: string) => Promise<FetchedResponse>;
+  authFetch: <FetchedResponse>(
+    endpoint: string
+  ) => Promise<FetchedResponse | undefined>;
 }
 
 const authContext = createContext({} as AuthCtxInterface);
@@ -69,16 +70,25 @@ function useProvideAuth() {
   const [user, setUser] = useState<UserDetailsResponse | null>(null);
   const { request: loginRequest } = useFetch<JWTResponse>(API_URL);
   const router = useRouter();
-  let storedToken: string | null;
+  let storedAccessToken: string | null;
+  let storedRefreshToken: string | null;
+
   if (typeof window !== "undefined") {
     // we are client side and have localStorage access
-    storedToken = localStorage.getItem("accessToken");
-    if (!accessToken && storedToken) {
+    storedAccessToken = localStorage.getItem("accessToken");
+    storedRefreshToken = localStorage.getItem("refreshToken");
+    if (
+      (!accessToken && storedAccessToken) ||
+      (!refreshToken && storedRefreshToken)
+    ) {
       // e.g. we had a page refresh and lost context data
-      // if we have stored token then add it to context
+      // if we have stored tokens then add them to context
       // HACK is grabbing from context any better than from localStorage?
       // otherwise we dont need to store refreshToken and accessToken in context
-      setAccessToken(storedToken);
+      console.log("grabbing from localstorage");
+
+      setAccessToken(storedAccessToken);
+      setRefreshToken(storedRefreshToken);
     }
   }
 
@@ -92,15 +102,14 @@ function useProvideAuth() {
         const userData = await authFetch<UserDetailsResponse>(
           `${API_URL}/auth/users/me`
         );
-        setUser(userData);
+        userData && setUser(userData);
       } catch {
         console.log("user detail fetch failed");
       }
     };
 
     if (accessToken !== null) {
-      console.log("getuser");
-
+      console.log("getting user");
       getUser();
     }
   }, [accessToken]);
@@ -129,56 +138,85 @@ function useProvideAuth() {
   async function authFetch<FetchedResponse>(endpoint: string) {
     // authenticated fetching data
     // TODO add all error/success handling, refresh token logic etc. here
-    if (!accessToken) {
-      // e.g. we had a page refresh and lost context data
-      // try get from localStorage
-
-      // if we have stored token then add it to context
-      if (storedToken) {
-        // we have stored token in localstorage, but not in context
-        console.log("grabbed stored token");
-
-        setAccessToken(storedToken);
-      } else {
-        // user needs to login
-        // we shouldn't be doing auth fetch without being logged in
-        throw Error;
-      }
+    if (!accessToken || !refreshToken) {
+      // stored tokens from localStorage should've populated these tokens
+      // we shouldn't be doing auth fetch without being logged in
+      // user needs to login before fetch
+      throw Error;
     }
 
     try {
       const res = await fetch(endpoint, {
-        headers: { Authorization: `Bearer ${storedToken}` },
+        headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
       if (res.ok) {
         const data: FetchedResponse = await res.json();
         console.log("fetch succeeded ");
 
         return data;
-      } else {
-        // force catch block execution
-        console.dir(res);
-        throw Error;
+      }
+      if (res.status == 401) {
+        // access token didnt work
+        // lets try get a new one with our refreshtoken
+        console.log(
+          `fetch failed with token ${storedAccessToken}, grabbing new tokens`
+        );
+        if (refreshToken) {
+          const refreshedTokenData = await getRefreshedTokens(refreshToken);
+          if (refreshedTokenData) {
+            const {
+              access_token: refreshedAccessToken,
+              refresh_token: refreshedRefreshToken,
+            } = refreshedTokenData;
+
+            // update all the tokens
+            setRefreshToken(refreshedRefreshToken);
+            setAccessToken(refreshedAccessToken);
+            localStorage.setItem("accessToken", refreshedAccessToken);
+            localStorage.setItem("refreshToken", refreshedRefreshToken);
+          }
+        }
+
+        // repeat request
+        const res = await fetch(endpoint, {
+          headers: { Authorization: `Bearer ${storedAccessToken}` },
+        });
+        if (res.ok) {
+          const data: FetchedResponse = await res.json();
+          console.log("fetch succeeded ");
+
+          return data;
+        }
       }
     } catch {
-      console.log(`fetch failed with token ${storedToken}`);
+      // some other fetch related error
       throw Error;
     }
   }
-  async function getNewAccessToken(refreshToken: string) {
+  async function getRefreshedTokens(refreshToken: string) {
     try {
-      const res = await fetch(`${API_URL}/auth/refresh`);
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+          token_type: "bearer",
+        }),
+      });
       if (res.statusText === "Token expired") {
         // user needs to login again
         console.log("refresh token expired");
         router.push("/login");
       } else {
-        const data = await res.json();
+        const data: JWTResponse = await res.json();
         console.log(data);
+        return data;
       }
     } catch (error) {
       console.log(error);
-
       router.push("/login");
     }
   }
