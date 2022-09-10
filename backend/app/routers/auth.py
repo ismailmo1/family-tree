@@ -12,6 +12,8 @@ from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
+from app.dependencies.exceptions import ExpiredTokenError
+
 
 router = APIRouter(prefix="/auth")
 
@@ -50,34 +52,33 @@ async def refresh_token(token: Token):
             "refresh_token": token.refresh_token,
             "token_type": "bearer",
         }
-    except ExpiredSignatureError:
+    except ExpiredTokenError as e:
         # we expect this error as the current access token should've expired
         # before asking for a refresh
-        pass
-    # now try using the refresh token
-    try:
-        refresh_payload = get_refresh_user(token.refresh_token)
-    except ExpiredSignatureError:
-        # refresh token is also expired, client needs to login again
-        # redirect on client side
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token expired",
+        # now try using the refresh token
+        try:
+            refresh_payload = get_refresh_user(token.refresh_token)
+        except ExpiredSignatureError:
+            # refresh token is also expired, client needs to login again
+            # redirect on client side
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+            )
+        # invalidate current refresh token so it can't be reused
+        blacklist_refresh_token(token.refresh_token)
+        new_access_token = create_access_token(
+            data={"sub": refresh_payload.username}
         )
-    # invalidate current refresh token so it can't be reused
-    blacklist_refresh_token(token.refresh_token)
-    new_access_token = create_access_token(
-        data={"sub": refresh_payload.username}
-    )
-    new_refresh_token = create_refresh_token(
-        data={"sub": refresh_payload.username}
-    )
+        new_refresh_token = create_refresh_token(
+            data={"sub": refresh_payload.username}
+        )
 
-    return {
-        "access_token": new_access_token,
-        "refresh_token": new_refresh_token,
-        "token_type": "bearer",
-    }
+        return {
+            "access_token": new_access_token,
+            "refresh_token": new_refresh_token,
+            "token_type": "bearer",
+        }
 
 
 # TODO add signup - check for existing username/email then add node
