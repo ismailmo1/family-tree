@@ -9,23 +9,25 @@ import {
   WrapItem,
 } from "@chakra-ui/react";
 import * as d3 from "d3";
-import dTree from "d3-dtree";
 import _ from "lodash";
-import { useRef } from "react";
+import dTree from "d3-dtree";
+import { useEffect, useRef } from "react";
 import { NuclearFamily } from "../../types/family";
 import SimplePersonCard from "./SimplePersonCard";
 
 const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
+  console.log("rendering tree");
+
   window.d3 = d3;
   const graphDiv = useRef<HTMLDivElement>(null);
-  if (graphDiv?.current?.children.length) {
-    // remove graph on subsequent renders
-    console.log("removing graph");
+  useEffect(() => {
+    // HACK remove tree if it exists already
+    if (graphDiv?.current?.children.length) {
+      // remove graph on subsequent renders
+      console.log("removing graph");
 
-    graphDiv.current.removeChild(graphDiv.current.children[0]);
-    console.log("creating graph");
-    console.log(family);
-
+      graphDiv.current.removeChild(graphDiv.current.children[0]);
+    }
     dTree.init([
       {
         name: family.parents[0].name, // The name of the node
@@ -45,7 +47,7 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
         extra: {}, // Custom data passed to renderers
       },
     ]);
-  }
+  }, [_]); //HACK add dependency to lodash otherwise it doesn't import properly
 
   const parentCards = (
     <>
