@@ -4,24 +4,25 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import SearchResults from "../../components/cards/SearchResults";
 import { API_URL } from "../../globals";
+import { useAuth } from "../../hooks/use-auth";
 import { PersonMatchResult } from "../../types/person";
 
 const PersonPage: NextPage = () => {
   const router = useRouter();
   const { person_id: personId } = router.query;
   const [personDetails, setPersonDetails] = useState<PersonMatchResult[]>();
-
+  const { authFetch } = useAuth();
   useEffect(() => {
     if (!personId) {
       return;
     }
 
     const fetchPersonDetails = async () => {
-      const res = await fetch(`${API_URL}/people/?id=${personId}`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      await authFetch<PersonMatchResult[]>(
+        `${API_URL}/people/?id=${personId}`
+      ).then((data) => {
+        setPersonDetails(data);
       });
-      const data: PersonMatchResult[] = await res.json();
-      setPersonDetails(data);
     };
     fetchPersonDetails();
   }, [personId]);
