@@ -34,18 +34,17 @@ const FindForm: React.FC<FindFormProps> = ({
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [cardLoading, setCardLoading] = useState<boolean>(false);
   const { authFetch } = useAuth();
+
   const searchPerson = useCallback(async () => {
     setIsFetching(true);
 
     try {
-      const data = await authFetch<PersonMatchResult[]>(
+      const data = await authFetch<PersonMatchResult[] | undefined>(
         `${API_URL}/people/?name=${personName.current?.value}`
       );
-      const peopleMatches: PersonMatchResult[] | undefined = data;
-      setPersonMatches(peopleMatches);
-    } catch (error) {
-      console.log(error);
-      return;
+      setPersonMatches(data);
+    } catch (e) {
+      console.log(e);
     }
 
     setIsFetching(false);
