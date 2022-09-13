@@ -14,10 +14,11 @@ import dTree from "d3-dtree";
 import { useEffect, useRef } from "react";
 import { NuclearFamily } from "../../types/family";
 import SimplePersonCard from "./SimplePersonCard";
+import { useRouter } from "next/router";
 
 const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
   console.log("rendering tree");
-
+  const router = useRouter();
   window.d3 = d3;
   const graphDiv = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -28,25 +29,38 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
 
       graphDiv.current.removeChild(graphDiv.current.children[0]);
     }
-    dTree.init([
-      {
-        name: family.parents[0].name, // The name of the node
-        class: "node", // The CSS class of the node
-        textClass: "nodeText", // The CSS class of the text in the node
-        depthOffset: 1, // Generational height offset
-        marriages: [
-          {
-            // Marriages is a list of nodes
-            spouse: {
-              // Each marriage has one spouse
-              name: family.parents[1].name,
+    dTree.init(
+      [
+        {
+          name: family.parents[0].name, // The name of the node
+          class: "node", // The CSS class of the node
+          textClass: "nodeText", // The CSS class of the text in the node
+          depthOffset: 1, // Generational height offset
+          marriages: [
+            {
+              // Marriages is a list of nodes
+              spouse: {
+                // Each marriage has one spouse
+                name: family.parents[1].name,
+                extra: { id: family.parents[1].id },
+              },
+              children: family.children.map((child) => {
+                return { ...child, extra: { id: child.id } }; // add id to extra obj to allow callbacks
+              }),
             },
-            children: family.children,
+          ],
+          extra: { id: family.parents[0].id }, // Custom data passed to renderers
+        },
+      ],
+      {
+        callbacks: {
+          nodeClick: (name: string, extra: { id: string }, id: number) => {
+            console.log(name, extra, id);
+            router.push(`/person/${extra.id}`);
           },
-        ],
-        extra: {}, // Custom data passed to renderers
-      },
-    ]);
+        },
+      }
+    );
   }, [_]); //HACK add dependency to lodash otherwise it doesn't import properly
 
   const parentCards = (
