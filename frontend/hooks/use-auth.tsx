@@ -85,16 +85,12 @@ function useProvideAuth() {
       // if we have stored tokens then add them to context
       // HACK is grabbing from context any better than from localStorage?
       // otherwise we dont need to store refreshToken and accessToken in context
-      console.log("grabbing from localstorage");
-
       setAccessToken(storedAccessToken);
       setRefreshToken(storedRefreshToken);
     }
   }
 
-  useEffect(() => {
-    console.log("running useeffect");
-
+  if (!user) {
     const getUser = async () => {
       try {
         // fetch api since useFetch doesnt allow changing headers
@@ -102,17 +98,16 @@ function useProvideAuth() {
         const userData = await authFetch<UserDetailsResponse>(
           `${API_URL}/auth/users/me`
         );
-        userData && setUser(userData);
-      } catch {
-        console.log("user detail fetch failed");
-      }
+        return userData;
+      } catch {}
     };
 
-    if (accessToken !== null) {
-      console.log("getting user");
-      getUser();
+    if (accessToken) {
+      getUser().then((data) => {
+        data && setUser(data);
+      });
     }
-  }, [accessToken]);
+  }
 
   const signin = async (username: string, password: string) => {
     const data = new FormData();
@@ -123,16 +118,17 @@ function useProvideAuth() {
     setRefreshToken(res.refresh_token);
     localStorage.setItem("accessToken", res.access_token);
     localStorage.setItem("refreshToken", res.refresh_token);
+    router.push("/starter");
   };
   const signup = (username: string, password: string) => {};
 
   const signout = () => {
-    console.log("signing out");
     setUser(null);
     setAccessToken(null);
     setRefreshToken(null);
-    localStorage.setItem("accessToken", "null");
-    localStorage.setItem("refreshToken", "null");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    router.push("/login");
   };
 
   async function authFetch<FetchedResponse>(endpoint: string) {
@@ -142,7 +138,8 @@ function useProvideAuth() {
       // stored tokens from localStorage should've populated these tokens
       // we shouldn't be doing auth fetch without being logged in
       // user needs to login before fetch
-      throw Error;
+      signout();
+      throw new Error("Not authenticated!");
     }
 
     try {
@@ -151,16 +148,12 @@ function useProvideAuth() {
       });
       if (res.ok) {
         const data: FetchedResponse = await res.json();
-        console.log("fetch succeeded ");
 
         return data;
       }
       if (res.status == 401) {
         // access token didnt work
         // lets try get a new one with our refreshtoken
-        console.log(
-          `fetch failed with token ${storedAccessToken}, grabbing new tokens`
-        );
         if (refreshToken) {
           const refreshedTokenData = await getRefreshedTokens(refreshToken);
           if (refreshedTokenData) {
@@ -183,7 +176,6 @@ function useProvideAuth() {
         });
         if (res.ok) {
           const data: FetchedResponse = await res.json();
-          console.log("fetch succeeded ");
 
           return data;
         }
@@ -208,16 +200,13 @@ function useProvideAuth() {
       });
       if (res.statusText === "Token expired") {
         // user needs to login again
-        console.log("refresh token expired");
-        router.push("/login");
+        signout();
       } else {
         const data: JWTResponse = await res.json();
-        console.log(data);
         return data;
       }
     } catch (error) {
-      console.log(error);
-      router.push("/login");
+      signout();
     }
   }
 
