@@ -1,6 +1,6 @@
 import { Container } from "@chakra-ui/react";
 import { useAuth } from "../../hooks/use-auth";
-import NavBar, { NavItem } from "../navigation/NavBar";
+import NavBar, { NavBarProps } from "../navigation/NavBar";
 
 interface LayoutProps {
   children?: React.ReactNode;
@@ -8,7 +8,7 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user } = useAuth();
-  const mainLinks: NavItem[] = [
+  const mainLinks = user && [
     { text: "Find", link: "/find" },
     { text: "New", link: "/new" },
     { text: "Explore", link: `/family/${user?.id}?perspective=child` },
@@ -17,7 +17,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <>
-      {user && <NavBar mainLinks={mainLinks} />}
+      <NavBar mainLinks={mainLinks} />
       <Container maxW={1000} centerContent>
         {children}
       </Container>

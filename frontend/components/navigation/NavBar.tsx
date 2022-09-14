@@ -25,9 +25,9 @@ export interface NavItem {
   link: string;
 }
 
-interface NavBarProps {
+export interface NavBarProps {
   children?: ReactNode;
-  mainLinks: NavItem[];
+  mainLinks: NavItem[] | null;
 }
 
 const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
@@ -56,33 +56,37 @@ const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
     <>
       <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
         <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-          <IconButton
-            size={"md"}
-            icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
-            aria-label={"Open Menu"}
-            display={{ md: "none" }}
-            onClick={isOpen ? onClose : onOpen}
-          />
+          {mainLinks && (
+            <IconButton
+              size={"md"}
+              icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+              aria-label={"Open Menu"}
+              display={{ md: "none" }}
+              onClick={isOpen ? onClose : onOpen}
+            />
+          )}
           <HStack spacing={8} alignItems={"center"}>
             <Link href="/">
               <Box as="button">🌳</Box>
             </Link>
-            <HStack
-              as={"nav"}
-              spacing={4}
-              display={{ base: "none", md: "flex" }}
-            >
-              {mainLinks.map((link) => (
-                <NavLink key={link.text} link={link.link}>
-                  {link.text}
-                </NavLink>
-              ))}
-            </HStack>
+            {mainLinks && (
+              <HStack
+                as={"nav"}
+                spacing={4}
+                display={{ base: "none", md: "flex" }}
+              >
+                {mainLinks.map((link) => (
+                  <NavLink key={link.text} link={link.link}>
+                    {link.text}
+                  </NavLink>
+                ))}
+              </HStack>
+            )}
           </HStack>
           <Flex alignItems={"center"}>{accountNavLinks}</Flex>
         </Flex>
 
-        {isOpen ? (
+        {isOpen && mainLinks ? (
           <Box pb={4} display={{ md: "none" }}>
             <Stack as={"nav"} spacing={4}>
               {mainLinks.map((link) => (
