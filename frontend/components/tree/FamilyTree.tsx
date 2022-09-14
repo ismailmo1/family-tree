@@ -13,8 +13,9 @@ import _ from "lodash";
 import dTree from "d3-dtree";
 import { useEffect, useRef } from "react";
 import { NuclearFamily } from "../../types/family";
-import SimplePersonCard from "./SimplePersonCard";
+import SimplePersonCard from "../cards/SimplePersonCard";
 import { useRouter } from "next/router";
+import styles from "./Tree.module.css";
 
 const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
   console.log("rendering tree");
@@ -33,7 +34,7 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
       [
         {
           name: family.parents[0].name, // The name of the node
-          class: "node", // The CSS class of the node
+          class: styles.mainNode, // The CSS class of the node
           textClass: "nodeText", // The CSS class of the text in the node
           depthOffset: 1, // Generational height offset
           marriages: [
@@ -42,10 +43,15 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
               spouse: {
                 // Each marriage has one spouse
                 name: family.parents[1].name,
+                class: styles.spouseNode,
                 extra: { id: family.parents[1].id },
               },
               children: family.children.map((child) => {
-                return { ...child, extra: { id: child.id } }; // add id to extra obj to allow callbacks
+                return {
+                  ...child,
+                  class: styles.childNode,
+                  extra: { id: child.id },
+                }; // add id to extra obj to allow callbacks
               }),
             },
           ],

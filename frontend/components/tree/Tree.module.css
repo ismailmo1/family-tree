@@ -1,0 +1,12 @@
+.mainNode {
+  background-color: red;
+}
+
+.spouseNode {
+  background-color: blue;
+  color: white;
+}
+
+.childNode {
+  background-color: greenyellow;
+}

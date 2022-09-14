@@ -3,7 +3,7 @@ import { NextPage } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import FamilyTree from "../../components/cards/FamilyTree";
+import FamilyTree from "../../components/tree/FamilyTree";
 import { API_URL } from "../../globals";
 import { useAuth } from "../../hooks/use-auth";
 import { NuclearFamily } from "../../types/family";
