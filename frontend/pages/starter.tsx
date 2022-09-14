@@ -25,7 +25,7 @@ const Starter: NextPage = () => {
         <StarterCard
           icon={ViewIcon}
           title="Explore your family tree"
-          link="/explore"
+          link={`/family/${user?.id}?perspective=child`}
         />
         <StarterCard
           icon={EditIcon}
