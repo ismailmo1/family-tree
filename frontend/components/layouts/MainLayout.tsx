@@ -18,7 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <>
       <NavBar mainLinks={mainLinks} />
-      <Container maxW={1000} centerContent>
+      <Container maxW={"80%"} centerContent>
         {children}
       </Container>
     </>

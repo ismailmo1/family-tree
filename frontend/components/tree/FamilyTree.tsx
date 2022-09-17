@@ -59,6 +59,8 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
         },
       ],
       {
+        width: 600,
+        height: 200,
         callbacks: {
           nodeClick: (name: string, extra: { id: string }, id: number) => {
             console.log(name, extra, id);
@@ -108,7 +110,7 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
   );
 
   return (
-    <Container minWidth={"60%"} py={5}>
+    <Container maxWidth="1700px" py={5}>
       <div ref={graphDiv} id="graph"></div>
       <VStack>
         {parentCards}
