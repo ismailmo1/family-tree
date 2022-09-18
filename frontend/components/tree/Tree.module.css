@@ -1,12 +1,20 @@
-.mainNode {
-  background-color: red;
-}
-
-.spouseNode {
-  background-color: blue;
-  color: white;
-}
-
+.mainNode,
+.spouseNode,
 .childNode {
-  background-color: greenyellow;
+  background-color: #b4cfb0;
+  border-radius: 2px;
+}
+
+.mainNode:hover,
+.spouseNode:hover,
+.childNode:hover {
+  background-color: #b0c3cf;
+  cursor: pointer;
+}
+
+.menu {
+  display: block;
+}
+.graph:hover ~ .menu {
+  color: red;
 }

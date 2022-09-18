@@ -11,16 +11,46 @@ import {
 import * as d3 from "d3";
 import _ from "lodash";
 import dTree from "d3-dtree";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NuclearFamily } from "../../types/family";
 import SimplePersonCard from "../cards/SimplePersonCard";
 import { useRouter } from "next/router";
 import styles from "./Tree.module.css";
+import { PersonMatchResult } from "../../types/person";
 
 const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
-  console.log("rendering tree");
+  const [activeNode, setActiveNode] = useState<PersonMatchResult>(
+    family.children[0]
+  );
   const router = useRouter();
   window.d3 = d3;
+  const treeData = [
+    {
+      name: family.parents[0]?.name || "No Parent Found", // The name of the node
+      class: styles.mainNode, // The CSS class of the node
+      textClass: "nodeText", // The CSS class of the text in the node
+      depthOffset: 1, // Generational height offset
+      marriages: [
+        {
+          // Marriages is a list of nodes
+          spouse: {
+            // Each marriage has one spouse
+            name: family.parents[1]?.name || "No Parent Found",
+            class: styles.spouseNode,
+            extra: { id: family.parents[1]?.id },
+          },
+          children: family.children?.map((child) => {
+            return {
+              ...child,
+              class: styles.childNode,
+              extra: { id: child.id },
+            }; // add id to extra obj to allow callbacks
+          }),
+        },
+      ],
+      extra: { id: family.parents[0]?.id }, // Custom data passed to renderers
+    },
+  ];
   const graphDiv = useRef<HTMLDivElement>(null);
   useEffect(() => {
     // HACK remove tree if it exists already
@@ -30,91 +60,56 @@ const FamilyTree: React.FC<{ family: NuclearFamily }> = ({ family }) => {
 
       graphDiv.current.removeChild(graphDiv.current.children[0]);
     }
-    dTree.init(
-      [
-        {
-          name: family.parents[0].name, // The name of the node
-          class: styles.mainNode, // The CSS class of the node
-          textClass: "nodeText", // The CSS class of the text in the node
-          depthOffset: 1, // Generational height offset
-          marriages: [
-            {
-              // Marriages is a list of nodes
-              spouse: {
-                // Each marriage has one spouse
-                name: family.parents[1].name,
-                class: styles.spouseNode,
-                extra: { id: family.parents[1].id },
-              },
-              children: family.children.map((child) => {
-                return {
-                  ...child,
-                  class: styles.childNode,
-                  extra: { id: child.id },
-                }; // add id to extra obj to allow callbacks
-              }),
-            },
-          ],
-          extra: { id: family.parents[0].id }, // Custom data passed to renderers
+    dTree.init(treeData, {
+      width: 600,
+      height: 200,
+      callbacks: {
+        nodeClick: (name: string, extra: { id: string }, id: number) => {
+          setActiveNode({ name: name, id: extra.id });
+          //router.push(`/person/${extra.id}`);
         },
-      ],
-      {
-        width: 600,
-        height: 200,
-        callbacks: {
-          nodeClick: (name: string, extra: { id: string }, id: number) => {
-            console.log(name, extra, id);
-            router.push(`/person/${extra.id}`);
-          },
+        nodeRenderer: function (
+          name: string,
+          x: Number,
+          y: Number,
+          height: Number,
+          width: Number,
+          extra: {},
+          id: string,
+          nodeClass: string,
+          textClass: string,
+          textRenderer: (name: string, extra: {}, textClass: string) => string
+        ) {
+          // This callback is optional but can be used to customize the
+          // node element using HTML.
+          let node = "";
+          node += "<div ";
+          node += 'style="height:100%;width:100%;" ';
+          node += 'class="' + nodeClass + '" ';
+          node += 'id="node' + id + '">\n';
+          node += textRenderer(name, extra, textClass);
+          node += "</div>";
+          console.log(x, y, name);
+
+          return node;
         },
-      }
-    );
-  }, [_]); //HACK add dependency to lodash otherwise it doesn't import properly
+      },
+    });
+  }, [_, treeData]); //HACK add dependency to lodash otherwise it doesn't import properly
 
-  const parentCards = (
+  const activeNodeCard = (
     <>
-      <Heading>Parents</Heading>
-      <HStack>
-        {family.parents.length > 0 ? (
-          family.parents.map((parent) => {
-            return (
-              <SimplePersonCard
-                key={parent.id}
-                name={parent.name}
-                id={parent.id}
-              />
-            );
-          })
-        ) : (
-          <Text>No Parents Found :(</Text>
-        )}
-      </HStack>
-    </>
-  );
-
-  const siblingCards = (
-    <>
-      <Heading>Children</Heading>
-      <Wrap spacing="10px" align="center" justify="center">
-        {family.children.map((children) => {
-          return (
-            <WrapItem key={children.id}>
-              <Center>
-                <SimplePersonCard name={children.name} id={children.id} />
-              </Center>
-            </WrapItem>
-          );
-        })}
-      </Wrap>
+      <Center>
+        <SimplePersonCard name={activeNode.name} id={activeNode.id} />
+      </Center>
     </>
   );
 
   return (
     <Container maxWidth="1700px" py={5}>
-      <div ref={graphDiv} id="graph"></div>
+      <div className={styles.graph} ref={graphDiv} id="graph"></div>
       <VStack>
-        {parentCards}
-        {siblingCards}
+        <div>{activeNodeCard}</div>
       </VStack>
     </Container>
   );
