@@ -11,6 +11,7 @@ import { useFetch } from "use-http";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
 import { API_URL } from "../../globals";
+import { useAuth } from "../../hooks/use-auth";
 import { PersonMatchResult } from "../../types/person";
 import { addRelationSuccessResponse } from "../../types/relationships";
 import RelationHeader from "../headers/RelationHeader";
@@ -46,6 +47,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
 
   const toast = useToast();
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
+  const { authFetch } = useAuth();
 
   const { loading, error, response, request } = useFetch<PersonMatchResult[]>(
     API_URL,
@@ -73,11 +75,15 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
       return;
     }
     const addPeopleUrl = genAddPeopleUrl(personId.toString(), newPersonId);
-    const res = await fetch(addPeopleUrl, { method: "POST" });
-    const addPersonData: addRelationSuccessResponse = await res.json();
+    // const res = await fetch(addPeopleUrl, { method: "POST" });
+    // const addPersonData: addRelationSuccessResponse = await res.json();
+    const addPersonData: addRelationSuccessResponse | undefined =
+      await authFetch<addRelationSuccessResponse>(addPeopleUrl, {
+        method: "POST",
+      });
     const successToastOptions: UseToastOptions = {
       title: `${title} added!`,
-      description: `${addPersonData.person.name} added as ${relation}!`,
+      description: `${addPersonData?.person.name} added as ${relation}!`,
       status: "success",
       duration: 5000,
       isClosable: true,

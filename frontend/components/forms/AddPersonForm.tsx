@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/router";
 import { useCallback, useRef, useState } from "react";
 import { API_URL } from "../../globals";
+import { useAuth } from "../../hooks/use-auth";
 import { PersonMatchResult } from "../../types/person";
 
 const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
@@ -22,7 +23,7 @@ const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
   const [isAdding, setIsAdding] = useState<boolean>(false);
   const toast = useToast();
   const router = useRouter();
-
+  const { authFetch } = useAuth();
   const renderToastContent = useCallback(
     (id: string, name: string) => (
       <Alert
@@ -49,21 +50,18 @@ const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
       return;
     }
     setIsAdding(true);
-    const res = await fetch(
-      `${API_URL}:8000/people/?name=${personName.current.value}`,
-      {
-        method: "POST",
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      }
+    const data = await authFetch<PersonMatchResult>(
+      `${API_URL}/people/?name=${personName.current.value}`,
+      { method: "POST" }
     );
-    const data: PersonMatchResult = await res.json();
 
-    toast({
-      render: () => renderToastContent(data.id, data.name),
-      isClosable: true,
-    });
+    data &&
+      toast({
+        render: () => renderToastContent(data.id, data.name),
+        isClosable: true,
+      });
     setIsAdding(false);
-    onAddPerson && onAddPerson(data.id);
+    onAddPerson && data && onAddPerson(data.id);
   }, [onAddPerson, renderToastContent, toast]);
 
   return (

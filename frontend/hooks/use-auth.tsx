@@ -131,7 +131,10 @@ function useProvideAuth() {
     router.push("/login");
   };
 
-  async function authFetch<FetchedResponse>(endpoint: string) {
+  async function authFetch<FetchedResponse>(
+    endpoint: string,
+    fetchOptions?: RequestInit
+  ) {
     // authenticated fetching data
     // TODO add all error/success handling, refresh token logic etc. here
     if (!accessToken || !refreshToken) {
@@ -144,6 +147,7 @@ function useProvideAuth() {
 
     try {
       const res = await fetch(endpoint, {
+        ...fetchOptions,
         headers: { Authorization: `Bearer ${storedAccessToken}` },
       });
       if (res.ok) {
@@ -172,6 +176,7 @@ function useProvideAuth() {
 
         // repeat request
         const res = await fetch(endpoint, {
+          ...fetchOptions,
           headers: { Authorization: `Bearer ${storedAccessToken}` },
         });
         if (res.ok) {
