@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import {
   createContext,
   ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -22,19 +23,13 @@ interface UserDetailsResponse {
   id: string;
 }
 
-const successToastOptions: UseToastOptions = {
-  title: "logged in!",
-  status: "success",
-  duration: 5000,
-  isClosable: true,
-};
-
 interface AuthCtxInterface {
   user: UserDetailsResponse | null;
   token: string | null;
   signin: (username: string, password: string) => void;
   signup: (username: string, password: string) => void;
   signout: () => void;
+  isFetching: boolean;
   authFetch: <FetchedResponse>(
     endpoint: string,
     fetchOptions?: RequestInit
@@ -67,10 +62,13 @@ export const useAuth = () => {
 function useProvideAuth() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
   const [user, setUser] = useState<UserDetailsResponse | null>(null);
   const router = useRouter();
-  let storedAccessToken: string | null;
-  let storedRefreshToken: string | null;
+  const toast = useToast();
+  let storedAccessToken: string | null = null;
+  let storedRefreshToken: string | null = null;
+  console.log("running useAuth");
 
   if (typeof window !== "undefined") {
     // we are client side and have localStorage access
@@ -89,134 +87,221 @@ function useProvideAuth() {
     }
   }
 
-  if (!user) {
-    const getUser = async () => {
-      try {
-        // fetch api since useFetch doesnt allow changing headers
-        // HACK: cant get provider to work for now :(
-        const userData = await authFetch<UserDetailsResponse>(
-          `${API_URL}/auth/users/me`
-        );
-        return userData;
-      } catch {}
-    };
-
-    if (accessToken) {
-      getUser().then((data) => {
-        data && setUser(data);
-      });
-    }
-  }
-
   const signin = async (username: string, password: string) => {
     const data = new FormData();
     data.append("username", username);
     data.append("password", password);
+    // setIsFetching(true);
     const res = await fetch(API_URL + "/auth/token", {
       method: "POST",
       body: data,
     });
-    const resData: JWTResponse = await res.json();
-    setAccessToken(resData.access_token);
-    setRefreshToken(resData.refresh_token);
-    localStorage.setItem("accessToken", resData.access_token);
-    localStorage.setItem("refreshToken", resData.refresh_token);
-    router.push("/starter");
+    // setIsFetching(false);
+
+    if (res.status == 200) {
+      const resData: JWTResponse = await res.json();
+      setAccessToken(resData.access_token);
+      setRefreshToken(resData.refresh_token);
+      localStorage.setItem("accessToken", resData.access_token);
+      localStorage.setItem("refreshToken", resData.refresh_token);
+      router.push("/starter");
+      toast({
+        title: `Login Success!`,
+        description: `Welcome back`,
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
+    } else {
+      router.push("/login");
+      toast({
+        title: `Failed login`,
+        description: `Try sign in again`,
+        status: "error",
+        duration: 2000,
+        isClosable: true,
+      });
+    }
   };
   const signup = (username: string, password: string) => {};
 
-  const signout = () => {
-    setUser(null);
-    setAccessToken(null);
-    setRefreshToken(null);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    router.push("/login");
-  };
+  const signout = useCallback(
+    (showToast: boolean = true) => {
+      setUser(null);
+      setAccessToken(null);
+      setRefreshToken(null);
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      router.push("/login");
+      showToast &&
+        toast({
+          title: `Logout Success!`,
+          description: `Bye!`,
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+    },
+    [router, toast]
+  );
+  const getRefreshedTokens = useCallback(
+    async function getRefreshedTokens(refreshToken: string) {
+      try {
+        // setIsFetching(true);
 
-  async function authFetch<FetchedResponse>(
-    endpoint: string,
-    fetchOptions?: RequestInit
-  ) {
-    // authenticated fetching data
-    // TODO add all error/success handling, refresh token logic etc. here
-    if (!accessToken || !refreshToken) {
-      // stored tokens from localStorage should've populated these tokens
-      // we shouldn't be doing auth fetch without being logged in
-      // user needs to login before fetch
-      signout();
-      throw new Error("Not authenticated!");
-    }
+        const res = await fetch(`${API_URL}/auth/refresh`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            token_type: "bearer",
+          }),
+        });
+        // setIsFetching(false);
 
-    try {
-      const res = await fetch(endpoint, {
-        ...fetchOptions,
-        headers: { Authorization: `Bearer ${storedAccessToken}` },
-      });
-      if (res.ok) {
-        const data: FetchedResponse = await res.json();
-
-        return data;
-      }
-      if (res.status == 401) {
-        // access token didnt work
-        // lets try get a new one with our refreshtoken
-        if (refreshToken) {
-          const refreshedTokenData = await getRefreshedTokens(refreshToken);
-          if (refreshedTokenData) {
-            const {
-              access_token: refreshedAccessToken,
-              refresh_token: refreshedRefreshToken,
-            } = refreshedTokenData;
-
-            // update all the tokens
-            setRefreshToken(refreshedRefreshToken);
-            setAccessToken(refreshedAccessToken);
-            localStorage.setItem("accessToken", refreshedAccessToken);
-            localStorage.setItem("refreshToken", refreshedRefreshToken);
-          }
+        if (res.statusText === "Token expired") {
+          // user needs to login again
+          signout();
+        } else {
+          const data: JWTResponse = await res.json();
+          return data;
         }
+      } catch (error) {
+        signout();
+      }
+    },
+    [accessToken, signout]
+  );
+  const authFetch = useCallback(
+    async function authFetchFunc<FetchedResponse>(
+      endpoint: string,
+      fetchOptions?: RequestInit
+    ) {
+      // authenticated fetching data
+      // TODO add all error/success handling, refresh token logic etc. here
+      if (!accessToken || !refreshToken) {
+        // stored tokens from localStorage should've populated these tokens
+        // we shouldn't be doing auth fetch without being logged in
+        // user needs to login before fetch
+        signout(false);
+        toast({
+          title: `Unauthorised`,
+          description: "Login to view that page",
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+        router.push("/login");
+        return;
+      }
 
-        // repeat request
+      try {
+        setIsFetching(true);
+
         const res = await fetch(endpoint, {
           ...fetchOptions,
           headers: { Authorization: `Bearer ${storedAccessToken}` },
         });
+        setIsFetching(false);
+
         if (res.ok) {
           const data: FetchedResponse = await res.json();
 
           return data;
         }
+        if (res.status == 401) {
+          // access token didnt work
+          // lets try get a new one with our refreshtoken
+          if (refreshToken) {
+            const refreshedTokenData = await getRefreshedTokens(refreshToken);
+            if (refreshedTokenData) {
+              const {
+                access_token: refreshedAccessToken,
+                refresh_token: refreshedRefreshToken,
+              } = refreshedTokenData;
+
+              // update all the tokens
+              setRefreshToken(refreshedRefreshToken);
+              setAccessToken(refreshedAccessToken);
+              localStorage.setItem("accessToken", refreshedAccessToken);
+              localStorage.setItem("refreshToken", refreshedRefreshToken);
+            }
+          }
+
+          // repeat request
+          // setIsFetching(true);
+
+          const res = await fetch(endpoint, {
+            ...fetchOptions,
+            headers: { Authorization: `Bearer ${storedAccessToken}` },
+          });
+          // setIsFetching(false);
+
+          if (res.ok) {
+            const data: FetchedResponse = await res.json();
+
+            return data;
+          }
+        }
+      } catch {
+        // some other fetch related error
+        setIsFetching(false);
+
+        signout(false);
+        toast({
+          title: `You must be logged in!`,
+          description: `Enter credentials`,
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
+        router.push("/login");
       }
-    } catch {
-      // some other fetch related error
-      throw Error;
-    }
-  }
-  async function getRefreshedTokens(refreshToken: string) {
-    try {
-      const res = await fetch(`${API_URL}/auth/refresh`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-          token_type: "bearer",
-        }),
-      });
-      if (res.statusText === "Token expired") {
-        // user needs to login again
-        signout();
-      } else {
-        const data: JWTResponse = await res.json();
-        return data;
+    },
+    [
+      accessToken,
+      refreshToken,
+      getRefreshedTokens,
+      router,
+      signout,
+      storedAccessToken,
+      toast,
+    ]
+  );
+
+  useEffect(() => {
+    if (!user) {
+      const getUser = async () => {
+        try {
+          const userData = await authFetch<UserDetailsResponse>(
+            `${API_URL}/auth/users/me`
+          );
+          return userData;
+        } catch (e) {
+          console.log(e);
+          signout(false);
+          toast({
+            title: `You must be logged in!`,
+            description: `Enter credentials`,
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+          });
+          router.push("/login");
+        }
+      };
+
+      if (accessToken) {
+        getUser().then((data) => {
+          console.log("grabbing user" + data);
+          data && setUser(data);
+        });
       }
-    } catch (error) {
-      signout();
     }
-  }
+  }, [user, accessToken, authFetch, router, signout, toast]);
 
   // Return the user object and auth methods
 
@@ -224,6 +309,7 @@ function useProvideAuth() {
     user,
     token: accessToken,
     authFetch,
+    isFetching,
     signin,
     signup,
     signout,
