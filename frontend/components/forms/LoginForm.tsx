@@ -4,6 +4,7 @@ import {
   FormControl,
   FormLabel,
   Input,
+  Spinner,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useAuth } from "../../hooks/use-auth";
@@ -12,7 +13,7 @@ const LoginForm = () => {
   const [usernameInput, setUsernameInput] = useState<string>("");
   const [passwordInput, setPasswordInput] = useState<string>("");
 
-  const { user, signin } = useAuth();
+  const { user, signin, isFetching } = useAuth();
 
   const loginUserHandler = () => {
     signin(usernameInput, passwordInput);
@@ -34,7 +35,9 @@ const LoginForm = () => {
         onChange={(e) => setPasswordInput(e.target.value)}
       />
       <Center py="5">
-        <Button onClick={loginUserHandler}>Login</Button>
+        <Button onClick={loginUserHandler}>
+          Login {isFetching && <Spinner />}
+        </Button>
       </Center>
     </FormControl>
   );
