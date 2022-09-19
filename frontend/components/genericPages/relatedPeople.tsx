@@ -7,7 +7,6 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useFetch } from "use-http";
 import SearchResults from "../../components/cards/SearchResults";
 import FindPersonModal from "../../components/modals/FindPersonModal";
 import { API_URL } from "../../globals";
@@ -29,7 +28,6 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const router = useRouter();
   const { person_id: personId } = router.query;
   const errorToastIdRef = useRef<ToastId>();
-
   const [peopleDetails, setPeopleDetails] = useState<PersonMatchResult[]>();
   // find person modal
   const {
@@ -49,17 +47,12 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   const title = relation.charAt(0).toUpperCase() + relation.slice(1);
   const { authFetch } = useAuth();
 
-  const { loading, error, response, request } = useFetch<PersonMatchResult[]>(
-    API_URL,
-    { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }
-  );
-
   const fetchPeople = useCallback(
     async (url: string) => {
-      const peopleData = await request.get(url);
-      if (response.ok) setPeopleDetails(peopleData);
+      const peopleData = await authFetch<PersonMatchResult[]>(API_URL + url);
+      setPeopleDetails(peopleData);
     },
-    [request, response]
+    [authFetch]
   );
 
   useEffect(() => {
@@ -78,7 +71,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     // const res = await fetch(addPeopleUrl, { method: "POST" });
     // const addPersonData: addRelationSuccessResponse = await res.json();
     const addPersonData: addRelationSuccessResponse | undefined =
-      await authFetch<addRelationSuccessResponse>(addPeopleUrl, {
+      await authFetch<addRelationSuccessResponse>(API_URL + addPeopleUrl, {
         method: "POST",
       });
     const successToastOptions: UseToastOptions = {
@@ -92,22 +85,6 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     onFindClose();
   };
 
-  if (response.ok === false) {
-    console.log(loading, response.ok);
-    const errorToastOptions: UseToastOptions = {
-      title: "Error!",
-      description: `${response.status}: ${response.statusText}`,
-      status: "error",
-      duration: 5000,
-      isClosable: true,
-    };
-    if (errorToastIdRef.current) {
-      toast.update(errorToastIdRef.current, errorToastOptions);
-    } else {
-      errorToastIdRef.current = toast(errorToastOptions);
-    }
-  }
-
   return (
     <>
       <RelationHeader
@@ -116,10 +93,7 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
         openAddModal={onNewOpen}
       />
 
-      {loading
-        ? `searching for ${relation}s...`
-        : response.ok &&
-          peopleDetails && <SearchResults personMatches={peopleDetails} />}
+      {peopleDetails && <SearchResults personMatches={peopleDetails} />}
 
       <FindPersonModal
         relation={relation}

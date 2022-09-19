@@ -8,7 +8,6 @@ import {
   useRef,
   useState,
 } from "react";
-import useFetch, { Provider, UseFetchArgsReturn } from "use-http";
 import { API_URL } from "../globals";
 
 interface JWTResponse {
@@ -37,7 +36,8 @@ interface AuthCtxInterface {
   signup: (username: string, password: string) => void;
   signout: () => void;
   authFetch: <FetchedResponse>(
-    endpoint: string
+    endpoint: string,
+    fetchOptions?: RequestInit
   ) => Promise<FetchedResponse | undefined>;
 }
 
@@ -68,7 +68,6 @@ function useProvideAuth() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetailsResponse | null>(null);
-  const { request: loginRequest } = useFetch<JWTResponse>(API_URL);
   const router = useRouter();
   let storedAccessToken: string | null;
   let storedRefreshToken: string | null;
@@ -113,11 +112,15 @@ function useProvideAuth() {
     const data = new FormData();
     data.append("username", username);
     data.append("password", password);
-    const res = await loginRequest.post("/auth/token", data);
-    setAccessToken(res.access_token);
-    setRefreshToken(res.refresh_token);
-    localStorage.setItem("accessToken", res.access_token);
-    localStorage.setItem("refreshToken", res.refresh_token);
+    const res = await fetch(API_URL + "/auth/token", {
+      method: "POST",
+      body: data,
+    });
+    const resData: JWTResponse = await res.json();
+    setAccessToken(resData.access_token);
+    setRefreshToken(resData.refresh_token);
+    localStorage.setItem("accessToken", resData.access_token);
+    localStorage.setItem("refreshToken", resData.refresh_token);
     router.push("/starter");
   };
   const signup = (username: string, password: string) => {};
