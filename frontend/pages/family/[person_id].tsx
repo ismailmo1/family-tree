@@ -9,8 +9,6 @@ import { useAuth } from "../../hooks/use-auth";
 import { NuclearFamily } from "../../types/family";
 
 const FamilyPage: NextPage = () => {
-  console.log("rendering fam page");
-
   const router = useRouter();
   const { person_id: personId } = router.query;
   const [family, setFamily] = useState<NuclearFamily>();
@@ -18,8 +16,6 @@ const FamilyPage: NextPage = () => {
   const { authFetch } = useAuth();
   useEffect(() => {
     if (!personId || !perspective) {
-      console.log(personId);
-
       return;
     }
     const fetchFamily = async () => {
@@ -28,20 +24,11 @@ const FamilyPage: NextPage = () => {
       ).then((data) => {
         setFamily(data);
       });
-
-      // setFamily({
-      //   parents: [
-      //     { id: "strin1g", name: "string2" },
-      //     { id: "string1", name: "string2" },
-      //   ],
-      //   children: [{ id: "string3", name: "string3" }],
-      // });
     };
 
     fetchFamily();
-  }, []);
+  }, [authFetch, personId, perspective]);
 
-  console.log(family);
   return (
     <>
       <Heading>Family</Heading>
