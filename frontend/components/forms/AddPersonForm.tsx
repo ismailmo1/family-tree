@@ -62,7 +62,7 @@ const CreatePersonForm: React.FC<{ onAddPerson?: (id: string) => void }> = ({
       });
     setIsAdding(false);
     onAddPerson && data && onAddPerson(data.id);
-  }, [onAddPerson, renderToastContent, toast]);
+  }, [onAddPerson, renderToastContent, toast, authFetch]);
 
   return (
     <>
