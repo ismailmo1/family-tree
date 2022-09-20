@@ -9,7 +9,7 @@ def delete_person(person_id: str):
     """
     cypher_query = "MATCH (p:Person {id:$person_id}) DETACH DELETE p"
 
-    family_graph.write_query(cypher_query, {"person_id": person_id})
+    return family_graph.write_query(cypher_query, {"person_id": person_id})
 
 
 def delete_relationships(person_id: str):
@@ -20,4 +20,4 @@ def delete_relationships(person_id: str):
     """
     cypher_query = "MATCH (p:Person {id:$person_id})-[rel]-() DELETE rel"
 
-    family_graph.write_query(cypher_query, {"person_id": person_id})
+    return family_graph.write_query(cypher_query, {"person_id": person_id})

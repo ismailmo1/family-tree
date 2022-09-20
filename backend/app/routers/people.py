@@ -3,6 +3,8 @@ from app.db.transactions.find import find_person_by_id, find_person_by_name
 from app.routers import auth
 from fastapi import APIRouter, Depends, HTTPException
 
+from app.db.transactions.delete import delete_person
+
 router = APIRouter(
     prefix="/people", dependencies=[Depends(auth.get_current_user)]
 )
@@ -29,3 +31,7 @@ def get_person(id: str | None = None, name: str | None = None):
 @router.post("/")
 def add_person(name: str):
     return create_person(name)[0]
+
+@router.delete("/")
+def remove_person(id: str):
+    return delete_person(id)
