@@ -232,33 +232,41 @@ function useProvideAuth() {
           }
 
           // repeat request
-          // setIsFetching(true);
+          setIsFetching(true);
 
           const res = await fetch(endpoint, {
             ...fetchOptions,
             headers: { Authorization: `Bearer ${storedAccessToken}` },
           });
-          // setIsFetching(false);
+          setIsFetching(false);
 
           if (res.ok) {
             const data: FetchedResponse = await res.json();
 
             return data;
           }
+          if (res.status == 401) {
+            signout(false);
+            toast({
+              title: `You must be logged in!`,
+              description: `Enter credentials`,
+              status: "success",
+              duration: 2000,
+              isClosable: true,
+            });
+            router.push("/login");
+          }
         }
       } catch {
         // some other fetch related error
         setIsFetching(false);
-
-        signout(false);
         toast({
-          title: `You must be logged in!`,
-          description: `Enter credentials`,
-          status: "success",
+          title: `Something went wrong`,
+          description: `Sorry!`,
+          status: "error",
           duration: 2000,
           isClosable: true,
         });
-        router.push("/login");
       }
     },
     [
