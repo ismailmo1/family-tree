@@ -28,42 +28,26 @@ const FamilyPage: NextPage = () => {
   const [activeNode, setActiveNode] = useState<PersonMatchResult | undefined>(
     currPerson
   );
+  const fetchFamily = useCallback(async () => {
+    await authFetch<NuclearFamily>(
+      `${API_URL}/family/nuclear?${perspective}_id=${personId}`
+    ).then((data) => {
+      setFamily(data);
+    });
+  }, [authFetch, personId, perspective]);
+
   useEffect(() => {
     if (!personId || !perspective) {
       return;
     }
-    const fetchFamily = async () => {
-      await authFetch<NuclearFamily>(
-        `${API_URL}/family/nuclear?${perspective}_id=${personId}`
-      ).then((data) => {
-        setFamily(data);
-      });
-    };
 
     fetchFamily();
-  }, [authFetch, personId, perspective]);
+  }, [fetchFamily, personId, perspective]);
   if (family) {
     currPerson = [...family?.parents, ...family?.children].find(
       (person) => person.id == personId
     );
   }
-  const deletePerson = useCallback(
-    async (id: string | undefined) => {
-      id && authFetch(`${API_URL}/people/?id=${id}`, { method: "DELETE" });
-    },
-    [authFetch]
-  );
-  const editOptions = (
-    <>
-      <IconButton
-        bgColor="#B4CFB0"
-        aria-label="edit-person"
-        size="lg"
-        icon={<DeleteIcon fontSize={"5xl"} />}
-        onClick={() => deletePerson(activeNode?.id)}
-      />
-    </>
-  );
 
   const activeNodeCard = (
     <>
