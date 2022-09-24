@@ -1,3 +1,4 @@
+from typing import Dict, List
 from uuid import uuid4
 
 from app.db import family_graph
@@ -72,7 +73,7 @@ def create_user(
     return result
 
 
-def create_person(person_name: str) -> dict[str, str]:
+def create_person(person_name: str) -> List[Dict[str, str]]:
     cypher_query = (
         "CREATE (person:Person { name: $person_name, id: $id }) "
         "RETURN person.name as name, person.id as id"
