@@ -1,3 +1,4 @@
+from typing import Optional
 from app.db.transactions.create import (
     add_child,
     create_marriage,
@@ -37,29 +38,36 @@ def get_siblings(id: str, full_only: bool = False):
 @router.post("/siblings")
 def add_siblings(person_id: str, sibling_to_add_id: str):
     # use person_id's parents as first option
-    person_parents_id = [p["id"] for p in find_parents(person_id)]
+    orig_person_parents_id = [p["id"] for p in find_parents(person_id)]
+    if len(orig_person_parents_id) > 0:
+        # person_id already has parents
+        # we only need to add the sibling as the parents' child
+        return add_child(
+            sibling_to_add_id,
+            orig_person_parents_id[0],
+            orig_person_parents_id[1],
+        )
 
-    if len(person_parents_id) == 0:
-        # check if sibling_to_add has parents
-        parents_id = [p["id"] for p in find_parents(sibling_to_add_id)]
-        # person_id is now the child that needs to be added to parents
-        child_id = person_id
-    else:
-        parents_id = person_parents_id
-        child_id = sibling_to_add_id
+    # person has no parents, let's check if sibling_to_add has parents
+    sibling_parents_id = [p["id"] for p in find_parents(sibling_to_add_id)]
+
+    if len(sibling_parents_id) > 0:
+        # add person_id to siblings to parents
+        return add_child(
+            person_id, sibling_parents_id[0], sibling_parents_id[1]
+        )
 
     # if neither have parents create dummy/placeholder parents and add both as children
-    if len(parents_id) == 0:
+    if len(sibling_parents_id) == 0 and len(orig_person_parents_id) == 0:
         dummy_parents = [
             create_person("dummy_parent")[0],
             create_person("dummy_parent")[0],
         ]
-        parents_id = [p["id"] for p in dummy_parents]
-        add_child(person_id, parents_id[0], parents_id[1])
-        child = add_child(sibling_to_add_id, parents_id[0], parents_id[1])[0]
-
-    child = add_child(child_id, parents_id[0], parents_id[1])[0]
-    return {"person": child["child"]}
+        dummy_parents_id = [p["id"] for p in dummy_parents]
+        add_child(person_id, dummy_parents_id[0], dummy_parents_id[1])
+        return add_child(
+            sibling_to_add_id, dummy_parents_id[0], dummy_parents_id[1]
+        )
 
 
 @router.get("/cousins")
@@ -75,13 +83,17 @@ def get_piblings(id: str):
     parent2_siblings = find_siblings(parents[1]["id"])
 
     return {
-        parents[0]["name"]: parent1_siblings,
-        parents[1]["name"]: parent2_siblings,
+        *parent1_siblings,
+        *parent2_siblings,
     }
 
 
 @router.get("/nuclear")
-def get_nuclear_family(child_id: str = None, parent_id: str = None):
+def get_nuclear_family(
+    child_id: Optional[str] = None, parent_id: Optional[str] = None
+):
+    parents = None
+    children = None
     if child_id:
         parents = find_parents(child_id)
         children = find_siblings(child_id)
@@ -93,5 +105,13 @@ def get_nuclear_family(child_id: str = None, parent_id: str = None):
         spouse = find_spouse(parent_id)
         parents = [*spouse, parent]
         children = find_children(parent_id)
-
     return {"parents": parents, "children": children}
+
+
+@router.get("/extended")
+def get_extended_family(
+    child_id: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    levels: int = 1,
+):
+    pass

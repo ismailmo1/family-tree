@@ -7,7 +7,7 @@ class FamilyGraph:
         self, uri: str, user: str | None = None, password: str | None = None
     ) -> None:
 
-        self.driver: neo4j.Driver = GraphDatabase.driver(
+        self.driver: neo4j.BoltDriver = GraphDatabase.driver(
             uri, auth=(user, password)
         )
 
