@@ -1,3 +1,4 @@
+from typing import Dict
 from app.db import family_graph
 from app.dependencies.exceptions import UserNotFoundError
 
@@ -24,7 +25,7 @@ def find_person_by_username(username: str) -> dict[str, str]:
     return first_match
 
 
-def find_person_by_name(person_name: str) -> list[str]:
+def find_person_by_name(person_name: str) -> list[Dict[str, str]]:
     """Find person nodes that contain name
 
     Args:
@@ -35,11 +36,11 @@ def find_person_by_name(person_name: str) -> list[str]:
         list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
     """
     cypher_query = (
-        "MATCH (p:Person) WHERE p.name CONTAINS $person_name "
+        "MATCH (p:Person) WHERE toLower(p.name) CONTAINS $person_name "
         "RETURN p.id as id"
     )
     results = family_graph.read_query(
-        cypher_query, {"person_name": person_name}
+        cypher_query, {"person_name": person_name.lower()}
     )
     return results
 
