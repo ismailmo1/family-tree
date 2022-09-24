@@ -12,20 +12,34 @@ router = APIRouter(
 
 @router.get("/")
 def get_person(id: str | None = None, name: str | None = None):
-    people_props = []
+    people_props = {
+        "name": "",
+        "id": "",
+        "num_siblings": 0,
+        "num_first_cousins": 0,
+        "num_children": 0,
+        "num_auncles": 0,
+    }
     if id is None and name is None:
         raise HTTPException(400, "You must provide either an id or name!")
     elif name:
+        # get person id
         id_list = find_person_by_name(name)
         if len(id_list) == 1:
             id_from_name = id_list[0]["id"]
             return [find_person_by_id(id_from_name)[0]["props"]]
 
         for person in id_list:
-            people_props.append(find_person_by_id(person["id"])[0]["props"])
+            people_props["name"] = find_person_by_id(person["id"])[0]["props"][
+                "name"
+            ]
+            people_props["id"] = find_person_by_id(person["id"])[0]["props"][
+                "id"
+            ]
     elif id is not None:
-        people_props = [find_person_by_id(id)[0]["props"]]
-    return people_props
+        people_props["name"] = find_person_by_id(id)[0]["props"]["name"]
+        people_props["id"] = find_person_by_id(id)[0]["props"]["id"]
+    return [people_props]
 
 
 @router.post("/")

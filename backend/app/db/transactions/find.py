@@ -150,9 +150,7 @@ def find_cousins(person_id: str, degree: int = 1):
         "MATCH (me:Person {id:$person_id})-[:CHILD_OF]->(parent:Person)"
         "-[:CHILD_OF]->(grandparents:Person)<-[:CHILD_OF]-"
         "(unc_aunt:Person)<-[:CHILD_OF]-(cousins:Person) "
-        "RETURN DISTINCT parent.id, parent.name,"
-        "unc_aunt.name, unc_aunt.id,"
-        "cousins.name, cousins.id"
+        "RETURN DISTINCT cousins.name as name, cousins.id as id"
     )
     results = family_graph.read_query(cypher_query, {"person_id": person_id})
 

@@ -11,6 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Stat,
   StatHelpText,
   StatLabel,
@@ -30,6 +31,10 @@ const PersonPage: NextPage = () => {
   const router = useRouter();
   const personId = router.query.person_id as string;
   const [personDetails, setPersonDetails] = useState<PersonMatchResult[]>();
+  const [siblingCount, setSiblingCount] = useState<number>();
+  const [childrenCount, setChildrenCount] = useState<number>();
+  const [cousinCount, setCousinCount] = useState<number>();
+  const [auncleCount, setAuncleCount] = useState<number>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { authFetch, signout, user } = useAuth();
   useEffect(() => {
@@ -38,11 +43,33 @@ const PersonPage: NextPage = () => {
     }
 
     const fetchPersonDetails = async () => {
+      console.log("fetching details");
+
       await authFetch<PersonMatchResult[]>(
         `${API_URL}/people/?id=${personId}`
       ).then((data) => {
         setPersonDetails(data);
       });
+      await authFetch<PersonMatchResult[]>(
+        `${API_URL}/family/siblings?id=${personId}`
+      ).then((data) => {
+        setSiblingCount(data?.length);
+      });
+      authFetch<PersonMatchResult[]>(
+        `${API_URL}/family/piblings?id=${personId}`
+      ).then((data) => {
+        setAuncleCount(data?.length);
+      });
+      authFetch<PersonMatchResult[]>(
+        `${API_URL}/family/cousins?id=${personId}`
+      ).then((data) => {
+        setCousinCount(data?.length);
+      });
+      authFetch<PersonMatchResult[]>(`${API_URL}/children?id=${personId}`).then(
+        (data) => {
+          setChildrenCount(data?.length);
+        }
+      );
     };
     fetchPersonDetails();
   }, [personId, authFetch]);
@@ -100,36 +127,20 @@ const PersonPage: NextPage = () => {
   const userStats = (
     <HStack marginY={"20px"}>
       <Stat>
-        <StatLabel>Total Siblings</StatLabel>
-        <StatNumber>
-          N/A
-          {/* {personDetails?.at(0)?.age || "N/A"} */}
-        </StatNumber>
-        <StatHelpText># Brothers and # Sisters</StatHelpText>
+        <StatLabel># Siblings</StatLabel>
+        <StatNumber>{siblingCount ?? <Spinner />}</StatNumber>
       </Stat>
       <Stat>
-        <StatLabel>Total Children</StatLabel>
-        <StatNumber>
-          N/A
-          {/* {personDetails?.at(0)?.childrenCount || "N/A"} */}
-        </StatNumber>
-        <StatHelpText># Sons and # Daughters</StatHelpText>
+        <StatLabel># Children</StatLabel>
+        <StatNumber>{childrenCount ?? <Spinner />}</StatNumber>
       </Stat>
       <Stat>
-        <StatLabel>Total 1st Cousins</StatLabel>
-        <StatNumber>
-          N/A
-          {/* {personDetails?.at(0)?.firstCousinCount || "N/A"} */}
-        </StatNumber>
-        <StatHelpText> # Mum | # Dad </StatHelpText>
+        <StatLabel># 1st Cousins</StatLabel>
+        <StatNumber>{cousinCount ?? <Spinner />}</StatNumber>
       </Stat>
       <Stat>
-        <StatLabel>Total Aunts/Uncles</StatLabel>
-        <StatNumber>
-          N/A
-          {/* {personDetails?.at(0)?.age || "N/A"} */}
-        </StatNumber>
-        <StatHelpText># Uncles and # Aunts</StatHelpText>
+        <StatLabel># Aunts/Uncles</StatLabel>
+        <StatNumber>{auncleCount ?? <Spinner />}</StatNumber>
       </Stat>
     </HStack>
   );
