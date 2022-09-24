@@ -6,13 +6,13 @@ from app.models.user import User
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from jose.exceptions import JWTClaimsError
+from jose.exceptions import JWTClaimsError, ExpiredSignatureError, JWTError
 from passlib.context import CryptContext
-from jose.exceptions import ExpiredSignatureError
 
 from app.dependencies.exceptions import (
     ExpiredTokenError,
     InvalidCredentialsError,
+    InvalidTokenError,
     UserNotFoundError,
 )
 
@@ -68,6 +68,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
         raise InvalidCredentialsError
     except ExpiredSignatureError:
         raise ExpiredTokenError
+    except JWTError:
+        raise InvalidTokenError
+
     user = get_user(username=username)
     if user is None:
         raise UserNotFoundError
