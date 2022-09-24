@@ -1,4 +1,4 @@
-import { DeleteIcon } from "@chakra-ui/icons";
+import { DeleteIcon, WarningIcon } from "@chakra-ui/icons";
 import {
   Button,
   Heading,
@@ -31,7 +31,7 @@ const PersonPage: NextPage = () => {
   const personId = router.query.person_id as string;
   const [personDetails, setPersonDetails] = useState<PersonMatchResult[]>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { authFetch } = useAuth();
+  const { authFetch, signout, user } = useAuth();
   useEffect(() => {
     if (!personId) {
       return;
@@ -54,24 +54,42 @@ const PersonPage: NextPage = () => {
     [authFetch]
   );
 
+  const deleteClickHandler = useCallback(() => {
+    deletePerson(personId);
+    if (personId == user?.id) {
+      signout();
+      return;
+    }
+    router.back();
+  }, [deletePerson, router, personId, signout, user]);
+
   const deleteConfirmModal = (
     <Modal isCentered isOpen={isOpen} onClose={onClose}>
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
       <ModalContent>
-        <ModalHeader>Confirm Delete</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text size={"lg"}>
-            Are you sure you want to remove {personDetails?.at(0)?.name} and all
-            associated relationships?
-          </Text>
+          <ModalHeader textAlign={"center"}>
+            {personId == user?.id ? (
+              <Text>
+                Are you sure you want to remove your account and all your
+                relationships?
+              </Text>
+            ) : (
+              <Text>
+                Are you sure you want to remove {personDetails?.at(0)?.name} and
+                all associated relationships?
+              </Text>
+            )}
+          </ModalHeader>
         </ModalBody>
         <ModalFooter display={"flex"} justifyContent={"space-around"}>
           <Button
             aria-label="delete-person"
             colorScheme={"red"}
-            onClick={() => deletePerson(personId)}
+            onClick={deleteClickHandler}
           >
+            <WarningIcon border={"0"} p={"1"} boxSize={"20px"} />
             Delete
           </Button>
           <Button onClick={onClose}>Close</Button>
