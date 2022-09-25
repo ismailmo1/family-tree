@@ -7,15 +7,11 @@ class FamilyGraph:
         self, uri: str, user: str | None = None, password: str | None = None
     ) -> None:
 
-        self.driver: neo4j.BoltDriver = GraphDatabase.driver(
-            uri, auth=(user, password)
-        )
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.driver.close()
+        self.driver: neo4j.BoltDriver
+        driver = GraphDatabase.driver(uri, auth=(user, password))
+        # narrow down type
+        assert type(driver) is neo4j.BoltDriver
+        self.driver = driver
 
     def clean_db(self):
         with self.driver.session() as session:
@@ -36,10 +32,8 @@ class FamilyGraph:
 
             return result_list
 
-        # use self context manager to close driver after use
-        with self:
-            with self.driver.session() as session:
-                result = session.read_transaction(trans_fn, query_args)
+        with self.driver.session() as session:
+            result = session.read_transaction(trans_fn, query_args)
 
         return result
 
@@ -58,10 +52,8 @@ class FamilyGraph:
 
             return result_list
 
-        # use self context manager to close driver after use
-        with self:
-            with self.driver.session() as session:
-                result = session.write_transaction(trans_fn, query_args)
+        with self.driver.session() as session:
+            result = session.write_transaction(trans_fn, query_args)
 
         return result
 
