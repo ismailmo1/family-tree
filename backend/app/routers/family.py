@@ -78,14 +78,18 @@ def get_cousins(id: str, degree: int = 1):
 @router.get("/piblings")
 def get_piblings(id: str):
     parents = find_parents(id)
+    parent1_siblings = []
+    parent2_siblings = []
 
-    parent1_siblings = find_siblings(parents[0]["id"])
-    parent2_siblings = find_siblings(parents[1]["id"])
+    if len(parents) > 0:
+        parent1_siblings = find_siblings(parents[0]["id"])
+    if len(parents) > 1:
+        parent2_siblings = find_siblings(parents[1]["id"])
 
-    return {
+    return [
         *parent1_siblings,
         *parent2_siblings,
-    }
+    ]
 
 
 @router.get("/nuclear")
