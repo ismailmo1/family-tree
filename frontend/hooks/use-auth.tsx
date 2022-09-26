@@ -98,29 +98,33 @@ function useProvideAuth() {
     });
     // setIsFetching(false);
 
-    if (res.status == 200) {
+    if (res.status === 200) {
       const resData: JWTResponse = await res.json();
       setAccessToken(resData.access_token);
       setRefreshToken(resData.refresh_token);
       localStorage.setItem("accessToken", resData.access_token);
       localStorage.setItem("refreshToken", resData.refresh_token);
       router.push("/starter");
-      toast({
-        title: `Login Success!`,
-        description: `Welcome back`,
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
+      !toast.isActive("loginSuccess") &&
+        toast({
+          id: "loginSuccess",
+          title: `Login Success!`,
+          description: `Welcome back`,
+          status: "success",
+          duration: 2000,
+          isClosable: true,
+        });
     } else {
       router.push("/login");
-      toast({
-        title: `Failed login`,
-        description: `Try sign in again`,
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
+      !toast.isActive("failedLogin") &&
+        toast({
+          id: "failedLogin",
+          title: `Failed login`,
+          description: `Try sign in again`,
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+        });
     }
   };
   const signup = (username: string, password: string) => {};
@@ -134,7 +138,9 @@ function useProvideAuth() {
       localStorage.removeItem("refreshToken");
       router.push("/login");
       showToast &&
+        !toast.isActive("logoutSuccess") &&
         toast({
+          id: "logoutSuccess",
           title: `Logout Success!`,
           description: `Bye!`,
           status: "success",
@@ -146,6 +152,7 @@ function useProvideAuth() {
   );
   const getRefreshedTokens = useCallback(
     async function getRefreshedTokens(refreshToken: string) {
+      if (!refreshToken) return;
       try {
         // setIsFetching(true);
 
@@ -162,15 +169,21 @@ function useProvideAuth() {
         });
         // setIsFetching(false);
 
-        if (res.statusText === "Token expired") {
+        if (res.status === 401) {
           // user needs to login again
+          // refresh token expired
           signout();
-        } else {
+          return;
+        }
+        if (res.status === 200) {
+          // our tokens got refreshed
           const data: JWTResponse = await res.json();
           return data;
         }
       } catch (error) {
+        // something else went wrong with our request
         signout();
+        return;
       }
     },
     [accessToken, signout]
@@ -187,18 +200,23 @@ function useProvideAuth() {
         // we shouldn't be doing auth fetch without being logged in
         // user needs to login before fetch
         signout(false);
-        toast({
-          title: `Unauthorised`,
-          description: "Login to view that page",
-          status: "success",
-          duration: 2000,
-          isClosable: true,
-        });
+        console.log(endpoint + " failed");
+
+        !toast.isActive("unauthorised") &&
+          toast({
+            id: "unauthorised",
+            title: `Unauthorised`,
+            description: "Login to view that page",
+            status: "warning",
+            duration: 2000,
+            isClosable: true,
+          });
         router.push("/login");
         return;
       }
 
       try {
+        // we have access token and refresh token
         setIsFetching(true);
 
         const res = await fetch(endpoint, {
@@ -212,7 +230,7 @@ function useProvideAuth() {
 
           return data;
         }
-        if (res.status == 401) {
+        if (res.status === 401) {
           // access token didnt work
           // lets try get a new one with our refreshtoken
           if (refreshToken) {
@@ -228,45 +246,50 @@ function useProvideAuth() {
               setAccessToken(refreshedAccessToken);
               localStorage.setItem("accessToken", refreshedAccessToken);
               localStorage.setItem("refreshToken", refreshedRefreshToken);
+              // repeat request
+              setIsFetching(true);
+
+              const res = await fetch(endpoint, {
+                ...fetchOptions,
+                headers: { Authorization: `Bearer ${storedAccessToken}` },
+              });
+              setIsFetching(false);
+
+              if (res.ok) {
+                const data: FetchedResponse = await res.json();
+
+                return data;
+              }
             }
           }
 
-          // repeat request
-          setIsFetching(true);
-
-          const res = await fetch(endpoint, {
-            ...fetchOptions,
-            headers: { Authorization: `Bearer ${storedAccessToken}` },
-          });
-          setIsFetching(false);
-
-          if (res.ok) {
-            const data: FetchedResponse = await res.json();
-
-            return data;
-          }
-          if (res.status == 401) {
+          if (res.status === 401) {
+            // our refresh token expired
             signout(false);
-            toast({
-              title: `You must be logged in!`,
-              description: `Enter credentials`,
-              status: "success",
-              duration: 2000,
-              isClosable: true,
-            });
+            !toast.isActive("expiredRefresh") &&
+              toast({
+                id: "expiredRefresh",
+                title: `Try Log in again!`,
+                description: `Enter credentials`,
+                status: "warning",
+                duration: 2000,
+                isClosable: true,
+              });
             router.push("/login");
           }
         }
       } catch {
         // some other fetch related error
         setIsFetching(false);
-        toast({
-          title: `Something went wrong`,
-          description: `Sorry!`,
-          status: "error",
-          duration: 2000,
-          isClosable: true,
-        });
+        !toast.isActive("serverError") &&
+          toast({
+            id: "serverError",
+            title: `Something went wrong`,
+            description: `Sorry!`,
+            status: "error",
+            duration: 2000,
+            isClosable: true,
+          });
       }
     },
     [
@@ -291,13 +314,15 @@ function useProvideAuth() {
         } catch (e) {
           console.log(e);
           signout(false);
-          toast({
-            title: `You must be logged in!`,
-            description: `Enter credentials`,
-            status: "success",
-            duration: 2000,
-            isClosable: true,
-          });
+          !toast.isActive("notLoggedIn") &&
+            toast({
+              id: "notLoggedIn",
+              title: `You must be logged in!`,
+              description: `Enter credentials`,
+              status: "success",
+              duration: 2000,
+              isClosable: true,
+            });
           router.push("/login");
         }
       };
