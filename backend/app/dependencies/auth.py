@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta, datetime
+from typing import Any, Dict
 
 from app.db.transactions.find import find_person_by_username
 from app.models.user import User
@@ -27,6 +28,8 @@ try:
     REFRESH_TOKEN_EXPIRE_MINUTES = 30  # int(
     #     os.environ["REFRESH_TOKEN_EXPIRE_MINUTES"]
     # )
+    INVITE_TOKEN_EXPIRE_MINUTES = 60  # int(
+
 except KeyError as e:
     raise Exception(f"Environment variable missing: {e}")
 
@@ -34,16 +37,16 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def get_user(username: str):
+def get_user(username: str) -> User:
     user = find_person_by_username(username)
     return User(**user)
 
 
-def verify_password(plain_password, hashed_password):
+def verify_password(plain_password, hashed_password) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-def get_password_hash(password):
+def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
@@ -140,3 +143,20 @@ def check_token_blacklist(refresh_token: str) -> bool:
     """Returns true if token is blacklisted"""
     # TODO check if refresh token isn't in blacklist
     return False
+
+
+def create_invite_token(
+    source_user_id: str, target_user_id: str, expiry_time_minutes: int
+) -> str:
+    data = {
+        "source_id": source_user_id,
+        "target_id": target_user_id,
+        "expiry_datetime": expiry_time_minutes + datetime.now().timestamp(),
+    }
+    expire = datetime.utcnow() + timedelta(minutes=INVITE_TOKEN_EXPIRE_MINUTES)
+    data.update({"exp": expire})
+    return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_invite_token(invite_token: str) -> Dict[str, Any]:
+    return jwt.decode(invite_token, key=SECRET_KEY)

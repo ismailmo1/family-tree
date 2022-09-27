@@ -2,17 +2,21 @@ from app.dependencies.auth import (
     authenticate_user,
     blacklist_refresh_token,
     create_refresh_token,
+    decode_invite_token,
     get_current_user,
     create_access_token,
     get_refresh_user,
+    hash_password,
 )
-from app.models.token import Token
-from jose.exceptions import ExpiredSignatureError
+from app.models.token import InviteToken, Token
+from jose.exceptions import ExpiredSignatureError, JWTError
 from app.models.user import User
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-
+from fastapi import Response, status
 from app.dependencies.exceptions import ExpiredTokenError
+from app.db.transactions.find import find_person_by_id
+from app.db.transactions.update import add_person_prop
 
 
 router = APIRouter(prefix="/auth")
@@ -83,3 +87,34 @@ async def refresh_token(token: Token):
 
 # TODO add signup - check for existing username/email then add node
 # TODO add invite link for family members to prevent duplicate nodes+graphs
+@router.post("/invite-link", response_model=InviteToken)
+def create_invite_token(
+    target_user_id: str,
+    current_user: User = Depends(get_current_user),
+):
+
+    return InviteToken(
+        token="", source_user_id=current_user.id, target_user_id=target_user_id
+    )
+
+
+@router.post("/signup")
+def signup_user(invite_token: str, new_username: str, new_password: str):
+    try:
+        invite_data = decode_invite_token(invite_token)
+    except JWTError:
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Invite Link",
+        )
+    target_user_id = invite_data["target_id"]
+    target_user = find_person_by_id(target_user_id)[0]
+    if "username" in target_user:
+        return HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User already exists!",
+        )
+    new_hashed_password = hash_password(new_password)
+    add_person_prop(target_user_id, {"username": new_username})
+    add_person_prop(target_user_id, {"hashed_password": new_hashed_password})
+    return Response(status_code=status.HTTP_201_CREATED)

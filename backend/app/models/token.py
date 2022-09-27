@@ -14,3 +14,9 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str | None = None
+
+
+class InviteToken(BaseModel):
+    token: str
+    source_user_id: str
+    target_user_id: str
