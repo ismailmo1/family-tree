@@ -14,7 +14,7 @@ const StarterCard: React.FC<StarterCardProps> = ({ icon, title, link }) => {
     <Link href={link}>
       <Box p={10} minH="20vh" as="button" bgColor="lightgrey">
         <HStack>
-          <CardIcon w={100} h={100} />
+          <CardIcon w={100} h={100} border={"0px"} />
           <Heading mb={4} size="lg">
             {title}
           </Heading>

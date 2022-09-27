@@ -59,7 +59,7 @@ const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
           {mainLinks && (
             <IconButton
               size={"md"}
-              icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
+              icon={isOpen ? <CloseIcon border={"0px"} /> : <HamburgerIcon />}
               aria-label={"Open Menu"}
               display={{ md: "none" }}
               onClick={isOpen ? onClose : onOpen}
@@ -67,7 +67,9 @@ const NavBar: React.FC<NavBarProps> = ({ mainLinks }) => {
           )}
           <HStack spacing={8} alignItems={"center"}>
             <Link href="/">
-              <Box as="button">🌳</Box>
+              <Box as="button">
+                <Text fontSize={"2xl"}>🌳</Text>
+              </Box>
             </Link>
             {mainLinks && (
               <HStack
