@@ -1,6 +1,7 @@
 from app.dependencies.auth import (
     authenticate_user,
     blacklist_refresh_token,
+    create_invite_token,
     create_refresh_token,
     decode_invite_token,
     get_current_user,
@@ -87,14 +88,17 @@ async def refresh_token(token: Token):
 
 # TODO add signup - check for existing username/email then add node
 # TODO add invite link for family members to prevent duplicate nodes+graphs
-@router.post("/invite-link", response_model=InviteToken)
-def create_invite_token(
+@router.post("/invite", response_model=InviteToken)
+def get_invite_token(
     target_user_id: str,
     current_user: User = Depends(get_current_user),
 ):
+    invite_token = create_invite_token(current_user.id, target_user_id)
 
     return InviteToken(
-        token="", source_user_id=current_user.id, target_user_id=target_user_id
+        token=invite_token,
+        source_user_id=current_user.id,
+        target_user_id=target_user_id,
     )
 
 
