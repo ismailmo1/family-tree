@@ -37,7 +37,9 @@ class FamilyGraph:
 
         return result
 
-    def write_query(self, query: str, query_args: dict[str, str]):
+    def write_query(
+        self, query: str, query_args: dict[str, str | dict[str, str]]
+    ):
 
         # create transaction function
         def trans_fn(tx, query_args):
