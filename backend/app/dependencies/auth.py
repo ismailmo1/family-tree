@@ -19,16 +19,18 @@ from app.dependencies.exceptions import (
 
 # register env variables
 try:
-    ALGORITHM = os.environ["JWT_ALGORITHM"]
+    ALGORITHM = os.environ.get("JWT_ALGORITHM", "HS256")
     ACCESS_TOKEN_EXPIRE_MINUTES = int(
-        os.environ["ACCESS_TOKEN_EXPIRE_MINUTES"]
+        os.environ.get("ACCESS_TOKEN_EXPIRE_MINUTES", 60)
     )
-    SECRET_KEY = os.environ["SECRET_KEY"]
-    REFRESH_SECRET_KEY = "test22"  # os.environ["REFRESH_SECRET_KEY"]
-    REFRESH_TOKEN_EXPIRE_MINUTES = 30  # int(
-    #     os.environ["REFRESH_TOKEN_EXPIRE_MINUTES"]
-    # )
-    INVITE_TOKEN_EXPIRE_MINUTES = 60  # int(
+    SECRET_KEY = os.environ.get("SECRET_KEY", "")
+    REFRESH_SECRET_KEY = os.environ.get("REFRESH_SECRET_KEY", "test22")
+    REFRESH_TOKEN_EXPIRE_MINUTES = int(
+        os.environ.get("REFRESH_TOKEN_EXPIRE_MINUTES", 60)
+    )
+    INVITE_TOKEN_EXPIRE_MINUTES = int(
+        os.environ.get("REFRESH_TOKEN_EXPIRE_MINUTES", 60 * 24)
+    )
 
 except KeyError as e:
     raise Exception(f"Environment variable missing: {e}")
@@ -145,16 +147,13 @@ def check_token_blacklist(refresh_token: str) -> bool:
     return False
 
 
-def create_invite_token(
-    source_user_id: str, target_user_id: str, expiry_time_minutes: int
-) -> str:
+def create_invite_token(source_user_id: str, target_user_id: str) -> str:
+    expire = datetime.utcnow() + timedelta(minutes=INVITE_TOKEN_EXPIRE_MINUTES)
     data = {
         "source_id": source_user_id,
         "target_id": target_user_id,
-        "expiry_datetime": expiry_time_minutes + datetime.now().timestamp(),
+        "exp": expire,
     }
-    expire = datetime.utcnow() + timedelta(minutes=INVITE_TOKEN_EXPIRE_MINUTES)
-    data.update({"exp": expire})
     return jwt.encode(data, SECRET_KEY, algorithm=ALGORITHM)
 
 

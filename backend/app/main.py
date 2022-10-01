@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+import os
 
 from app.routers import auth, children, family, parents, people
 
@@ -18,10 +19,7 @@ def index():
     return RedirectResponse("/docs")
 
 
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+origins = [os.environ.get("FRONTEND_URL", "http://localhost:3000")]
 
 app.add_middleware(
     CORSMiddleware,
