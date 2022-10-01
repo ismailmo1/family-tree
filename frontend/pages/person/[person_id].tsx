@@ -1,4 +1,10 @@
-import { DeleteIcon, WarningIcon } from "@chakra-ui/icons";
+import { CheckIcon, CopyIcon, DeleteIcon, WarningIcon } from "@chakra-ui/icons";
+import {
+  Input,
+  InputGroup,
+  InputLeftElement,
+  InputRightElement,
+} from "@chakra-ui/react";
 import {
   Button,
   Heading,
@@ -35,7 +41,16 @@ const PersonPage: NextPage = () => {
   const [childrenCount, setChildrenCount] = useState<number>();
   const [cousinCount, setCousinCount] = useState<number>();
   const [auncleCount, setAuncleCount] = useState<number>();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isDeleteOpen,
+    onOpen: onDeleteOpen,
+    onClose: onDeleteClose,
+  } = useDisclosure();
+  const {
+    isOpen: isInviteOpen,
+    onOpen: onInviteOpen,
+    onClose: onInviteClose,
+  } = useDisclosure();
   const { authFetch, signout, user } = useAuth();
   useEffect(() => {
     if (!personId) {
@@ -45,12 +60,12 @@ const PersonPage: NextPage = () => {
     const fetchPersonDetails = async () => {
       console.log("fetching details");
 
-      await authFetch<PersonMatchResult[]>(
-        `${API_URL}/people/?id=${personId}`
-      ).then((data) => {
-        setPersonDetails(data);
-      });
-      await authFetch<PersonMatchResult[]>(
+      authFetch<PersonMatchResult[]>(`${API_URL}/people/?id=${personId}`).then(
+        (data) => {
+          setPersonDetails(data);
+        }
+      );
+      authFetch<PersonMatchResult[]>(
         `${API_URL}/family/siblings?id=${personId}`
       ).then((data) => {
         setSiblingCount(data?.length);
@@ -81,6 +96,20 @@ const PersonPage: NextPage = () => {
     [authFetch]
   );
 
+  const invitePerson = useCallback(
+    async (id: string | undefined) => {
+      id &&
+        authFetch(`${API_URL}/auth/invite`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ target_user_id: id }),
+        });
+    },
+    [authFetch]
+  );
+
   const deleteClickHandler = useCallback(() => {
     deletePerson(personId);
     if (personId == user?.id) {
@@ -91,7 +120,7 @@ const PersonPage: NextPage = () => {
   }, [deletePerson, router, personId, signout, user]);
 
   const deleteConfirmModal = (
-    <Modal isCentered isOpen={isOpen} onClose={onClose}>
+    <Modal isCentered isOpen={isDeleteOpen} onClose={onDeleteClose}>
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
       <ModalContent>
         <ModalCloseButton />
@@ -119,8 +148,37 @@ const PersonPage: NextPage = () => {
             <WarningIcon border={"0"} p={"1"} boxSize={"20px"} />
             Delete
           </Button>
-          <Button onClick={onClose}>Close</Button>
+          <Button onClick={onDeleteClose}>Close</Button>
         </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+
+  const inviteModal = (
+    <Modal isCentered isOpen={isInviteOpen} onClose={onInviteClose}>
+      <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
+      <ModalContent>
+        <ModalCloseButton />
+        <ModalBody>
+          <ModalHeader textAlign={"center"}>
+            Invite {personDetails?.at(0)?.name} to family tree with the link
+            below:
+          </ModalHeader>
+          <InputGroup>
+            <Input isReadOnly placeholder="Loading invite link..." />
+            <InputRightElement>
+              <IconButton
+                aria-label="copy"
+                icon={<CopyIcon border="0" color="green.500" />}
+                onClick={() => console.log("copied!")}
+              />
+            </InputRightElement>
+          </InputGroup>
+        </ModalBody>
+        <ModalFooter
+          display={"flex"}
+          justifyContent={"space-around"}
+        ></ModalFooter>
       </ModalContent>
     </Modal>
   );
@@ -151,15 +209,26 @@ const PersonPage: NextPage = () => {
         <>
           <SearchResults personMatches={personDetails} />
           {userStats}
-          <Button
-            aria-label="delete-person"
-            size="lg"
-            colorScheme={"red"}
-            onClick={() => onOpen()}
-          >
-            Delete
-          </Button>
+          <HStack width="inherit" justifyContent="space-evenly">
+            <Button
+              aria-label="delete-person"
+              size="lg"
+              colorScheme={"red"}
+              onClick={() => onDeleteOpen()}
+            >
+              Delete
+            </Button>
+            <Button
+              aria-label="invite-person"
+              size="lg"
+              colorScheme={"blue"}
+              onClick={() => onInviteOpen()}
+            >
+              Invite
+            </Button>
+          </HStack>
           {deleteConfirmModal}
+          {inviteModal}
         </>
       )}
     </>
