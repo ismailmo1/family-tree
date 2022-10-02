@@ -12,11 +12,13 @@ class Token(BaseModel):
     token_type: str
 
 
-class TokenData(BaseModel):
-    username: str | None = None
-
-
 class InviteToken(BaseModel):
     token: str
     source_user_id: str
     target_user_id: str
+
+
+class SignupForm(BaseModel):
+    invite_token: str
+    username: str
+    password: str

@@ -30,3 +30,20 @@ class InvalidTokenError(HTTPException):
             detail="Invalid Token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+
+class InvalidInviteTokenError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid Invite Token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+class UserExistsError(HTTPException):
+    def __init__(self):
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User already exists!",
+        )

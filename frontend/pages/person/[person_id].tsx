@@ -4,6 +4,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  useToast,
 } from "@chakra-ui/react";
 import {
   Button,
@@ -32,6 +33,11 @@ import SearchResults from "../../components/cards/SearchResults";
 import { API_URL } from "../../globals";
 import { useAuth } from "../../hooks/use-auth";
 import { PersonMatchResult } from "../../types/person";
+interface InviteToken {
+  token: string;
+  source_user_id: string;
+  target_user_id: string;
+}
 
 const PersonPage: NextPage = () => {
   const router = useRouter();
@@ -41,6 +47,9 @@ const PersonPage: NextPage = () => {
   const [childrenCount, setChildrenCount] = useState<number>();
   const [cousinCount, setCousinCount] = useState<number>();
   const [auncleCount, setAuncleCount] = useState<number>();
+  const [inviteLink, setInviteLink] = useState<string>();
+  const [isLinkCopied, setIsLinkCopied] = useState<boolean>();
+  const toast = useToast();
   const {
     isOpen: isDeleteOpen,
     onOpen: onDeleteOpen,
@@ -98,18 +107,22 @@ const PersonPage: NextPage = () => {
 
   const invitePerson = useCallback(
     async (id: string | undefined) => {
-      id &&
-        authFetch(`${API_URL}/auth/invite`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ target_user_id: id }),
-        });
+      if (id && !inviteLink) {
+        const inviteToken = await authFetch<InviteToken>(
+          `${API_URL}/auth/invite?target_user_id=${id}`,
+          {
+            method: "POST",
+          }
+        );
+        setInviteLink(inviteToken?.token);
+      }
     },
-    [authFetch]
+    [authFetch, inviteLink]
   );
-
+  const inviteModalOpenHandler = () => {
+    onInviteOpen();
+    invitePerson(personId);
+  };
   const deleteClickHandler = useCallback(() => {
     deletePerson(personId);
     if (personId == user?.id) {
@@ -118,7 +131,18 @@ const PersonPage: NextPage = () => {
     }
     router.back();
   }, [deletePerson, router, personId, signout, user]);
-
+  const copyInviteLink = () => {
+    if (inviteLink) {
+      navigator.clipboard.writeText(inviteLink);
+      setIsLinkCopied(true);
+      toast({
+        title: `Copied to clipboard!`,
+        status: "success",
+        duration: 1000,
+        isClosable: true,
+      });
+    }
+  };
   const deleteConfirmModal = (
     <Modal isCentered isOpen={isDeleteOpen} onClose={onDeleteClose}>
       <ModalOverlay bg="blackAlpha.300" backdropFilter="blur(10px)" />
@@ -161,16 +185,24 @@ const PersonPage: NextPage = () => {
         <ModalCloseButton />
         <ModalBody>
           <ModalHeader textAlign={"center"}>
-            Invite {personDetails?.at(0)?.name} to family tree with the link
-            below:
+            Invite {personDetails?.at(0)?.name} to 🌳 Family Tree 🌳 with the
+            link below:
           </ModalHeader>
           <InputGroup>
-            <Input isReadOnly placeholder="Loading invite link..." />
+            <Input
+              isReadOnly
+              placeholder={inviteLink || "Loading invite link..."}
+            />
             <InputRightElement>
               <IconButton
                 aria-label="copy"
-                icon={<CopyIcon border="0" color="green.500" />}
-                onClick={() => console.log("copied!")}
+                icon={
+                  <CopyIcon
+                    border="0"
+                    color={isLinkCopied ? "green.500" : "gray.500"}
+                  />
+                }
+                onClick={() => copyInviteLink()}
               />
             </InputRightElement>
           </InputGroup>
@@ -222,7 +254,7 @@ const PersonPage: NextPage = () => {
               aria-label="invite-person"
               size="lg"
               colorScheme={"blue"}
-              onClick={() => onInviteOpen()}
+              onClick={() => inviteModalOpenHandler()}
             >
               Invite
             </Button>

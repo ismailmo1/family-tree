@@ -27,7 +27,7 @@ interface AuthCtxInterface {
   user: UserDetailsResponse | null;
   token: string | null;
   signin: (username: string, password: string) => void;
-  signup: (username: string, password: string) => void;
+  signup: (username: string, password: string, inviteToken: string) => void;
   signout: () => void;
   isFetching: boolean;
   authFetch: <FetchedResponse>(
@@ -127,7 +127,21 @@ function useProvideAuth() {
         });
     }
   };
-  const signup = (username: string, password: string) => {};
+  const signup = async (
+    username: string,
+    password: string,
+    inviteToken: string
+  ) => {
+    const data = new FormData();
+    data.append("username", username);
+    data.append("password", password);
+    data.append("invite_token", inviteToken);
+    // setIsFetching(true);
+    const res = await fetch(API_URL + "/auth/signup", {
+      method: "POST",
+      body: data,
+    });
+  };
 
   const signout = useCallback(
     (showToast: boolean = true) => {
