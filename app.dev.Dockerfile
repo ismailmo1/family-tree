@@ -14,8 +14,3 @@ COPY . .
 RUN python -m pip install -r ./backend/requirements.txt
 
 RUN npm --prefix ./frontend install ./frontend --force
-
-
-
-
-
