@@ -1,0 +1,55 @@
+version: "3.4"
+
+services:
+  frontend:
+    restart: unless-stopped
+    build:
+      context: ./frontend
+      dockerfile: frontend.prod.Dockerfile
+    ports: ["3000:3000"]
+
+  backend:
+    restart: unless-stopped
+    build:
+      context: ./backend
+      dockerfile: backend.prod.Dockerfile
+    ports: ["8000:8000"]
+    environment:
+      NEO4J_URI: bolt://db:7687
+      SECRET_KEY: secret_key
+      REFRESH_SECRET_KEY: refresh_secret_key
+      JWT_ALGORITHM: jwt_algorithm
+      ACCESS_TOKEN_EXPIRE_MINUTES: 30
+      REFRESH_TOKEN_EXPIRE_MINUTES: 1440
+    command: sleep infinity
+    depends_on:
+      - db
+    secrets:
+      - secret_key
+      - refresh_secret_key
+      - jwt_algorithm
+
+  db:
+    image: marcellodesales/neo4j-with-cypher-seed:latest
+    restart: unless-stopped
+    ports: [7687:7687, 7474:7474]
+    environment:
+      NEO4J_USERNAME: db_user
+      NEO4J_PASSWORD: db_pass
+
+    secrets:
+      - db_user
+      - db_pass
+    volumes:
+      - ./neo4j-runtime/data:/data
+      - ./neo4j-runtime/logs:/logs
+      - ./neo4j-runtime/import:/var/lib/neo4j/import
+      - ./neo4j-runtime/plugins:/plugins
+      - ./backend/tests/seed.cql:/cyphers/seed.cql
+
+secrets:
+  secret_key:
+  refresh_secret_key:
+  jwt_algorithm:
+  db_user:
+  db_pass:
