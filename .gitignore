@@ -1,2 +1,9 @@
-.env
+*.env
 *:Zone.Identifier
+neo4j-runtime
+db_pass.txt
+db_user.txt
+db_auth.txt
+jwt_algorithm.txt
+refresh_secret_key.txt
+secret_key.txt
