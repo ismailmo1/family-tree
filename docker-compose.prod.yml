@@ -3,26 +3,47 @@ version: "3.4"
 services:
   frontend:
     restart: unless-stopped
-    image: ismailmo1/famtree-webapp
-    ports: ["3000:3000"]
+    image: ismailmo1/famtree-webapp:latest
+    expose:
+      - 3000
+    networks:
+      - backend
+      - linode-config_default
+    environment:
+      VIRTUAL_HOST: fam.ismailmo.com
+      LETSENCRYPT_HOST: fam.ismailmo.com
   backend:
     restart: unless-stopped
-    image: ismailmo1/famtree-api
-    ports: ["8000:8000"]
+    image: ismailmo1/famtree-api:latest
+    expose:
+      - 8000
     env_file: prod.env
     environment:
+      VIRTUAL_HOST: fam-api.ismailmo.com
+      LETSENCRYPT_HOST: fam-api.ismailmo.com
       NEO4J_URI: bolt://db:7687
       ACCESS_TOKEN_EXPIRE_MINUTES: 30
       REFRESH_TOKEN_EXPIRE_MINUTES: 1440
+      FRONTEND_URL: https://fam.ismailmo.com
     depends_on:
       - db
+    networks:
+      - backend
+      - linode-config_default
   db:
     image: neo4j:latest
     restart: unless-stopped
-    ports: [7687:7687, 7474:7474]
     env_file: prod.env
+    networks:
+      - backend
     volumes:
       - ./neo4j-runtime/data:/data
       - ./neo4j-runtime/logs:/logs
       - ./neo4j-runtime/import:/var/lib/neo4j/import
       - ./neo4j-runtime/plugins:/plugins
+networks:
+  # name of nginx proxy network
+  linode-config_default:
+    external: True
+  backend:
+    driver: bridge
