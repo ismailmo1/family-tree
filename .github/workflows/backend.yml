@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: Deploy frontend
+name: Deploy backend
 env:
   IMAGE_NAME: ismailmo1/famtree-api
   
