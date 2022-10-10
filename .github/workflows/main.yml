@@ -44,3 +44,18 @@ jobs:
             tags: |
               ${{ env.IMAGE_NAME}}:${{ github.sha }}
               ${{ env.IMAGE_NAME}}:latest  
+    deploy:
+      needs: "update-docker-image"
+      runs-on: ubuntu-latest
+      steps:
+      - name: restart container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ${{ secrets.LINODE_USERNAME }}
+          password: ${{ secrets.LINODE_PASSWORD }}
+          port: ${{ secrets.LINODE_PORT }}
+          script: |
+            docker pull ${{ env.IMAGE_NAME }}
+            wget https://raw.githubusercontent.com/ismailmo1/family-tree/main/docker-compose.prod.yml -O famtree/docker-compose.prod.yml            
+            docker-compose -f famtree/docker-compose.prod.yml up -d
