@@ -2,6 +2,7 @@ version: "3.4"
 
 services:
   frontend:
+    container_name: famtree-frontend
     restart: unless-stopped
     image: ismailmo1/famtree-webapp:latest
     expose:
@@ -13,6 +14,7 @@ services:
       VIRTUAL_HOST: fam.ismailmo.com
       LETSENCRYPT_HOST: fam.ismailmo.com
   backend:
+    container_name: famtree-backend
     restart: unless-stopped
     image: ismailmo1/famtree-api:latest
     expose:
@@ -31,8 +33,9 @@ services:
       - backend
       - linode-config_default
   db:
-    image: neo4j:latest
+    container_name: famtree-db
     restart: unless-stopped
+    image: neo4j:latest
     env_file: prod.env
     networks:
       - backend
