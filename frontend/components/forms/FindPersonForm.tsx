@@ -33,6 +33,7 @@ const FindForm: React.FC<FindFormProps> = ({
   const [personMatches, setPersonMatches] = useState<PersonMatchResult[]>();
   const [isFetching, setIsFetching] = useState<boolean>(false);
   const [cardLoading, setCardLoading] = useState<boolean>(false);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
   const { authFetch } = useAuth();
 
   const searchPerson = useCallback(async () => {
@@ -46,9 +47,9 @@ const FindForm: React.FC<FindFormProps> = ({
     } catch (e) {
       console.log(e);
     }
-
+    setHasSearched(true);
     setIsFetching(false);
-  }, []);
+  }, [authFetch]);
 
   const onCardClick = useCallback(
     (e: MouseEvent<HTMLElement>) => {
@@ -94,13 +95,13 @@ const FindForm: React.FC<FindFormProps> = ({
             {skeletonCard}
             {skeletonCard}
           </>
-        ) : (
+        ) : peopleMatchCards && peopleMatchCards.length > 0 ? (
           <>
-            {peopleMatchCards && peopleMatchCards.length > 0 && (
-              <Text alignSelf="flex-start">{searchHeading}</Text>
-            )}
+            {<Text alignSelf="flex-start">{searchHeading}</Text>}
             {peopleMatchCards}
           </>
+        ) : (
+          hasSearched && <Text alignSelf="center">No Matches Found</Text>
         )}
       </VStack>
     </>
