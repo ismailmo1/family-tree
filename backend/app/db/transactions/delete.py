@@ -33,7 +33,7 @@ def delete_relationship(person_id_1: str, person_id_2: str):
         person_id_1 (str): id of person 1
         person_id_2 (str): id of person 1
     """
-    cypher_query = """MATCH (p:Person {id:$person_id_1})-[rel]-p:Person {id:$person_id_2})
+    cypher_query = """MATCH (p:Person {id:$person_id_1})-[rel]-(p:Person {id:$person_id_2})
                         DELETE rel"""
 
     return family_graph.write_query(
