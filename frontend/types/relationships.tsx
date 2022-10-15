@@ -1,5 +1,3 @@
 import { PersonMatchResult } from "./person";
 
-export interface addRelationSuccessResponse {
-  person: PersonMatchResult;
-}
+export interface addRelationSuccessResponse extends PersonMatchResult {}

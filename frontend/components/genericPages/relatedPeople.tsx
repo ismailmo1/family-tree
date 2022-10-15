@@ -68,15 +68,13 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
       return;
     }
     const addPeopleUrl = genAddPeopleUrl(personId.toString(), newPersonId);
-    // const res = await fetch(addPeopleUrl, { method: "POST" });
-    // const addPersonData: addRelationSuccessResponse = await res.json();
     const addPersonData: addRelationSuccessResponse | undefined =
       await authFetch<addRelationSuccessResponse>(API_URL + addPeopleUrl, {
         method: "POST",
       });
     const successToastOptions: UseToastOptions = {
       title: `${title} added!`,
-      description: `${addPersonData?.person.name} added as ${relation}!`,
+      description: `${addPersonData?.name} added as ${relation}!`,
       status: "success",
       duration: 5000,
       isClosable: true,
