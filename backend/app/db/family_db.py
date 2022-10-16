@@ -1,3 +1,4 @@
+from typing import Optional
 import neo4j
 from neo4j import GraphDatabase
 
@@ -17,7 +18,9 @@ class FamilyGraph:
         with self.driver.session() as session:
             session.write_transaction(self._clean_db)
 
-    def read_query(self, query: str, query_args: dict[str, str]):
+    def read_query(
+        self, query: str, query_args: Optional[dict[str, str]] = None
+    ):
 
         # create transaction function
         def trans_fn(tx, query_args):
@@ -38,7 +41,9 @@ class FamilyGraph:
         return result
 
     def write_query(
-        self, query: str, query_args: dict[str, str | dict[str, str]]
+        self,
+        query: str,
+        query_args: Optional[dict[str, str | dict[str, str]]] = None,
     ):
 
         # create transaction function
