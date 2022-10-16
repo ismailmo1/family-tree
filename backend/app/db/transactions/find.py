@@ -4,13 +4,13 @@ from app.dependencies.exceptions import UserNotFoundError
 
 
 def find_person_by_username(username: str) -> dict[str, str]:
-    """Find person node that matches username
+    """Find a person node that matches username
 
     Args:
         username (str): username to search for
 
     Returns:
-        dict[str, str]: list of people ids: [<ID1>, <ID2>...]
+        dict[str, str]: Person properties: {prop:val, prop2, val2]
     """
     cypher_query = (
         "MATCH (p:Person { username:$username }) RETURN properties(p) as props"
@@ -19,8 +19,10 @@ def find_person_by_username(username: str) -> dict[str, str]:
         first_match = family_graph.read_query(
             cypher_query, {"username": username}
         )[0]["props"]
-    except IndexError:
-        raise UserNotFoundError(f"No person matching {username} found!")
+    except IndexError as err:
+        raise UserNotFoundError(
+            f"No person matching {username} found!"
+        ) from err
 
     return first_match
 
@@ -33,7 +35,7 @@ def find_person_by_name(person_name: str) -> list[Dict[str, str]]:
         person_name (str): the name to search for
 
     Returns:
-        list[dict[str, str]]: list of people ids: [<ID1>, <ID2>...]
+        list[dict[str,str]]: list of people ids: [{'id':<ID1>}{'id:<ID2>}...]
     """
     cypher_query = (
         "MATCH (p:Person) WHERE toLower(p.name) CONTAINS $person_name "
@@ -133,8 +135,8 @@ def find_all_siblings(person_id: str):
 def find_siblings(person_id: str, full_only=False):
     if full_only:
         return find_full_siblings(person_id)
-    else:
-        return find_all_siblings(person_id)
+
+    return find_all_siblings(person_id)
 
 
 def find_cousins(person_id: str, degree: int = 1):
