@@ -34,12 +34,13 @@ def add_child(
     parent1_id: str,
     parent2_id: str,
 ) -> list[dict[str, str]]:
+    """create child of relationship between child and parent 1 and 2 if they don't exist already"""
     cypher_query = (
         "MATCH (parent1:Person { id: $parent1_id})"
         "MATCH (parent2:Person { id: $parent2_id})"
         "MATCH (child:Person { id: $child_id}) "
-        "CREATE (child)-[:CHILD_OF]-> (parent1)"
-        "CREATE (child)-[:CHILD_OF]->(parent2)"
+        "MERGE (child)-[:CHILD_OF]-> (parent1)"
+        "MERGE (child)-[:CHILD_OF]->(parent2)"
         "RETURN child"
     )
     result = family_graph.write_query(

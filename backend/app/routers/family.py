@@ -22,6 +22,14 @@ router = APIRouter(
 
 @router.post("/spouse")
 def wed_couple(person1_id: str, person2_id: str):
+    """marry person1 to person2 and combine all children adding to both couples.
+    Does not currently support separation of children i.e. stepchildren"""
+
+    person1_children = [child["id"] for child in find_children(person1_id)]
+    person2_children = [child["id"] for child in find_children(person2_id)]
+    all_children = [*person1_children, *person2_children]
+    for child in all_children:
+        add_child(child, person1_id, person2_id)
     return create_marriage(person1_id, person2_id)[0]
 
 
