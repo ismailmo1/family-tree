@@ -89,11 +89,11 @@ const PersonPage: NextPage = () => {
       ).then((data) => {
         setCousinCount(data?.length);
       });
-      authFetch<PersonMatchResult[]>(`${API_URL}/children?id=${personId}`).then(
-        (data) => {
-          setChildrenCount(data?.length);
-        }
-      );
+      authFetch<PersonMatchResult[]>(
+        `${API_URL}/children?parent_id=${personId}`
+      ).then((data) => {
+        setChildrenCount(data?.length);
+      });
     };
     fetchPersonDetails();
   }, [personId, authFetch]);

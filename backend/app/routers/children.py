@@ -1,5 +1,5 @@
-from app.db.transactions.create import create_child
-from app.db.transactions.find import find_children
+from app.db.transactions.find import find_children, find_spouse
+from app.db.transactions.create import add_child
 from app.routers import auth
 from fastapi import APIRouter, Depends
 
@@ -9,10 +9,18 @@ router = APIRouter(
 
 
 @router.get("/")
-def get_children(id: str):
-    return find_children(id)
+def get_children(parent_id: str):
+    """Get list of children of `parent_id"""
+    return find_children(parent_id)
 
 
 @router.post("/")
-def birth_child(child_name: str, parent1_id: str, parent2_id: str):
-    return create_child(child_name, parent1_id, parent2_id)
+def add_children(child_id: str, parent_id: str, add_to_spouse: bool = True):
+    """add child relation to `parent_id` and also to `parent_id`'s spouse
+    Set `add_to_spouse` to False to override this behaviour."""
+    response = add_child(child_id, parent_id)
+    if add_to_spouse:
+        spouse = find_spouse(parent_id)[0]
+        if spouse:
+            add_child(child_id, spouse["id"])
+    return response

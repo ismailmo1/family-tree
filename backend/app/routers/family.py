@@ -29,7 +29,9 @@ def wed_couple(person1_id: str, person2_id: str):
     person2_children = [child["id"] for child in find_children(person2_id)]
     all_children = [*person1_children, *person2_children]
     for child in all_children:
-        add_child(child, person1_id, person2_id)
+        # add child relationship to both parents
+        add_child(child, person1_id)
+        add_child(child, person2_id)
     return create_marriage(person1_id, person2_id)[0]
 
 
