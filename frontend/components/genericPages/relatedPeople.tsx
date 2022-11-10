@@ -18,7 +18,7 @@ import AddPersonModal from "../modals/AddPersonModal";
 interface GenericRelationPageProps {
   genGetPeopleUrl(id: string): string;
   genAddPeopleUrl(id: string, id_to_add: string): string;
-  relation: "sibling" | "parent" | "spouse";
+  relation: "sibling" | "parent" | "spouse" | "child";
 }
 const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
   relation,
@@ -83,10 +83,14 @@ const RelatedPeoplePage: React.FC<GenericRelationPageProps> = ({
     onFindClose();
   };
 
+  // use pluralizer library if this gets out of hand
+  // handle special plural case of child->children instead of childs
+  const pluralSuffix = relation == "child" ? "ren" : "s";
+
   return (
     <>
       <RelationHeader
-        title={`${title}s`}
+        title={title + pluralSuffix}
         openFindModal={onFindOpen}
         openAddModal={onNewOpen}
       />

@@ -42,11 +42,13 @@ const PersonCard: React.FC<PersonMatchResult> = ({ name, id }) => {
                 <Text>|</Text>
                 <NextLink href={`/spouse/${id}`}>❤️ Spouse</NextLink>
                 <Text>|</Text>
+                <NextLink href={`/children/${id}`}>👨‍👩‍👦‍👦 Children</NextLink>
+                <Text>|</Text>
                 <Text
                   cursor="pointer"
                   onClick={() => setShowFamilyOptions(true)}
                 >
-                  👨‍👩‍👦‍👦 Family
+                  🌳 Tree
                 </Text>
               </>
             )}
